@@ -4,4 +4,5 @@
     <dimen name="list_item_file_image_margin">20dp</dimen>
     <dimen name="list_item_file_image_size">75dp</dimen>
     <dimen name="list_item_file_text_size">18sp</dimen>
+    <dimen name="sb_track_progress_height">20dp</dimen>
 </resources>
