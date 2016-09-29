@@ -40,18 +40,22 @@
             android:text="@string/btn_stop_text"
             style="?android:attr/buttonBarButtonStyle"/>
     </LinearLayout>
-    <!--<ProgressBar-->
-        <!--android:id="@+id/pbTrackProgress"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="@dimen/pb_track_progress_height"-->
-        <!--android:indeterminate="false"-->
-        <!--android:progress="0"-->
-        <!--android:max="100"-->
-        <!--style="?android:attr/progressBarStyleHorizontal"/>-->
     <SeekBar
         android:id="@+id/sbTrackProgress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:progress="0"
         android:max="100"/>
+    <ProgressBar
+        android:id="@+id/pbIndicationLeft"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="false"
+        style="?android:attr/progressBarStyleHorizontal"/>
+    <ProgressBar
+        android:id="@+id/pbIndicationRight"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="false"
+        style="?android:attr/progressBarStyleHorizontal"/>
 </LinearLayout>
