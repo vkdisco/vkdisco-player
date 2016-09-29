@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">vkDisco</string>
+    <string name="btn_load_file_text">Load file</string>
+    <string name="btn_play_text">Play</string>
+    <string name="btn_pause_text">Pause</string>
+    <string name="btn_stop_text">Stop</string>
 </resources>
