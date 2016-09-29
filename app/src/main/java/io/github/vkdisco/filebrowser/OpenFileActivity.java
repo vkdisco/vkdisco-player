@@ -15,7 +15,7 @@ import java.util.List;
 import io.github.vkdisco.R;
 
 public class OpenFileActivity extends AppCompatActivity implements ListView.OnItemClickListener{
-    public static final String PACKAGE_NAME = "com.alexeychurchill.rangetextanalyzer";
+    public static final String PACKAGE_NAME = "io.github.vkdisco";
     public static final String EXTRA_FILENAME = PACKAGE_NAME.concat(".EXTRA_FILENAME");
     private static final String ROOT_DIR = "/mnt/";
     private FileBrowserAdapter mAdapter;
