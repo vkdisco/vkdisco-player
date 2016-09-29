@@ -1,3 +1,8 @@
+/**
+ * ------------------------!WARNING!-----------------------------
+ * THIS CLASS AND OpenFileActivity.java WILL BE DELETED AS SOON AS POSSIBLE!
+ */
+
 package io.github.vkdisco.filebrowser;
 
 import android.content.Context;
@@ -14,6 +19,7 @@ import java.util.List;
 
 import io.github.vkdisco.R;
 
+@Deprecated
 public class FileBrowserAdapter extends BaseAdapter {
     private LayoutInflater mInflater;
     private List<File> mFileList;
