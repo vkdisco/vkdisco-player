@@ -11,11 +11,19 @@ import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.un4seen.bass.BASS;
+import com.vk.sdk.VKAccessToken;
+import com.vk.sdk.VKCallback;
+import com.vk.sdk.VKScope;
+import com.vk.sdk.VKSdk;
+import com.vk.sdk.api.VKError;
 
 import io.github.vkdisco.filebrowser.OpenFileActivity;
+import io.github.vkdisco.fragments.UserAudioFragment;
 
 public class SampleActivity extends AppCompatActivity
-        implements View.OnClickListener, SeekBar.OnSeekBarChangeListener {
+        implements View.OnClickListener,
+        SeekBar.OnSeekBarChangeListener,
+        UserAudioFragment.OnAudioSelectedListener {
     private static final int RC_LOAD_FILE = 1;
 
     private int mChannelHandle = 0;
@@ -23,12 +31,54 @@ public class SampleActivity extends AppCompatActivity
     private LevelUpdateThread mLevelUpdateThread = null;
     private boolean mPlaying = false;
 
+    private Button btnLogin;
+    private Button btnLogout;
+    private boolean isResumed = false;
+    // Custom scope for our app
+    private static final String[] sScope = new String[]{
+            VKScope.AUDIO,
+            VKScope.NOHTTPS,
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample);
         initBass(); //BASS initialization
         initViews(); //Views initialization
+
+        if (savedInstanceState == null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .add(R.id.fragment_container, new UserAudioFragment())
+                    .commit();
+        }
+
+        // Checking of logging in VK
+        VKSdk.wakeUpSession(this, new VKCallback<VKSdk.LoginState>() {
+            @Override
+            public void onResult(VKSdk.LoginState res) {
+                if (isResumed) {
+                    switch (res) {
+                        case LoggedOut:
+                            btnLogin.setVisibility(View.INVISIBLE);
+                            break;
+                        case LoggedIn:
+                            btnLogout.setVisibility(View.VISIBLE);
+                            break;
+                        case Pending:
+                            break;
+                        case Unknown:
+                            break;
+                    }
+                }
+            }
+
+            @Override
+            public void onError(VKError error) {
+
+            }
+        });
     }
 
     @Override
@@ -40,7 +90,36 @@ public class SampleActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onResume() {
+        super.onResume();
+        isResumed = true;
+        if (VKSdk.isLoggedIn()) {
+            btnLogout.setVisibility(View.VISIBLE);
+            showPopular();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        isResumed = false;
+        super.onPause();
+    }
+
+    @Override
+    protected void onActivityResult(final int requestCode, int resultCode, Intent data) {
+        VKCallback<VKAccessToken> callback = new VKCallback<VKAccessToken>() {
+            @Override
+            public void onResult(VKAccessToken res) {
+                btnLogin.setVisibility(View.INVISIBLE);
+                btnLogout.setVisibility(View.VISIBLE);
+                showPopular();
+            }
+
+            @Override
+            public void onError(VKError error) {
+
+            }
+        };
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
                 case RC_LOAD_FILE: //If user chosen file to open
@@ -68,6 +147,18 @@ public class SampleActivity extends AppCompatActivity
                 break;
             case R.id.btnStop:
                 onTrackStop();
+            case R.id.btnLogIn:
+                VKSdk.login(this, sScope);
+                if (VKSdk.isLoggedIn()) {
+                    btnLogin.setVisibility(View.INVISIBLE);
+                }
+                break;
+            case R.id.btnLogOut:
+                VKSdk.logout();
+                if (!VKSdk.isLoggedIn()) {
+                    btnLogout.setVisibility(View.INVISIBLE);
+                    showPopular();
+                }
                 break;
         }
     }
@@ -140,6 +231,13 @@ public class SampleActivity extends AppCompatActivity
         BASS.BASS_ChannelSetPosition(mChannelHandle, 0, BASS.BASS_POS_BYTE);
     }
 
+    private void showPopular() {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, new UserAudioFragment())
+                .commitAllowingStateLoss();
+    }
+
     private void initBass() {
         if (!BASS.BASS_Init(-1, 44100, 0)) {
             //Initialization default device (-1) at sample frequency 44100kHz without flags (0)
@@ -169,6 +267,14 @@ public class SampleActivity extends AppCompatActivity
         if (btnStop != null) {
             btnStop.setOnClickListener(this);
         }
+        btnLogin = (Button) findViewById(R.id.btnLogIn);
+        if (btnLogin != null) {
+            btnLogin.setOnClickListener(this);
+        }
+        btnLogout = (Button) findViewById(R.id.btnLogOut);
+        if (btnLogout != null) {
+            btnLogout.setOnClickListener(this);
+        }
         SeekBar sbTrackProgress = ((SeekBar) findViewById(R.id.sbTrackProgress));
         if (sbTrackProgress != null) {
             sbTrackProgress.setOnSeekBarChangeListener(this);
@@ -188,6 +294,21 @@ public class SampleActivity extends AppCompatActivity
         }
         playControlsEnabled(true);
     }
+
+    private void loadFileByURL(String url) {
+        if (url == null) {
+            return;
+        }
+        mChannelHandle = BASS.BASS_StreamCreateURL(url, 0, 0, null, 0); // Loading audio file by url
+        if (mChannelHandle == 0) {
+            Toast.makeText(this, "Steam from url creation fail!", Toast.LENGTH_SHORT)
+                    .show();
+            playControlsEnabled(false);
+            return;
+        }
+        playControlsEnabled(true);
+    }
+
 
     private void startTrackProgressUpdate() {
         if (mUpdateThread != null) {
@@ -260,6 +381,11 @@ public class SampleActivity extends AppCompatActivity
         if (btnStop != null) {
             btnStop.setEnabled(enabled);
         }
+    }
+
+    @Override
+    public void onAudioSelected(String url) {
+        loadFileByURL(url);
     }
 
     /**
