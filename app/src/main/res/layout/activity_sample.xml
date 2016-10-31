@@ -58,4 +58,14 @@
         android:layout_height="wrap_content"
         android:indeterminate="false"
         style="?android:attr/progressBarStyleHorizontal"/>
+    <EditText
+        android:id="@+id/etURL"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textUri" />
+    <Button
+        android:id="@+id/btnLoadURL"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_load_url_text"/>
 </LinearLayout>

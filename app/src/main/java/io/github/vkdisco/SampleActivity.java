@@ -4,13 +4,17 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.un4seen.bass.BASS;
+
+import java.nio.ByteBuffer;
 
 import io.github.vkdisco.filebrowser.OpenFileActivity;
 
@@ -60,6 +64,9 @@ public class SampleActivity extends AppCompatActivity
             case R.id.btnLoadFile:
                 onLoadFile();
                 break;
+            case R.id.btnLoadURL:
+                onLoadUrl();
+                break;
             case R.id.btnPlay:
                 onTrackPlay();
                 break;
@@ -106,6 +113,54 @@ public class SampleActivity extends AppCompatActivity
         Intent intent = new Intent(this, OpenFileActivity.class);
         startActivityForResult(intent, RC_LOAD_FILE);
     }
+
+    private void onLoadUrl() {
+        onTrackStop();
+        if (mChannelHandle != 0) {
+            BASS.BASS_StreamFree(mChannelHandle);
+        }
+        //...
+        EditText etURL = ((EditText) findViewById(R.id.etURL));
+        if (etURL == null) {
+            return;
+        }
+        SeekBar sbTrackProgress = ((SeekBar) findViewById(R.id.sbTrackProgress));
+        if (sbTrackProgress != null) {
+            sbTrackProgress.setSecondaryProgress(0);
+            sbTrackProgress.setProgress(0);
+        }
+        //...
+        String trackUrl = etURL.getText().toString();
+        mChannelHandle = BASS.BASS_StreamCreateURL(trackUrl, 0, 0, mDownloadproc, sbTrackProgress);
+        //...
+        if (mChannelHandle == 0) {
+            Toast.makeText(this, "Track load failed", Toast.LENGTH_SHORT)
+                    .show();
+            playControlsEnabled(false);
+            Log.e("SampleActivity", "BASS:ERROR CODE: " + BASS.BASS_ErrorGetCode());
+            return;
+        }
+        playControlsEnabled(true);
+    }
+
+    private BASS.DOWNLOADPROC mDownloadproc = new BASS.DOWNLOADPROC() {
+        @Override
+        public void DOWNLOADPROC(ByteBuffer buffer, int length, Object user) {
+            if (user == null) {
+                return;
+            }
+            if (!(user instanceof SeekBar)) {
+                return;
+            }
+            SeekBar sbTrackProgress = ((SeekBar) findViewById(R.id.sbTrackProgress));
+            if (sbTrackProgress != null) {
+                long total = BASS.BASS_StreamGetFilePosition(mChannelHandle, BASS.BASS_FILEPOS_END);
+                long downloaded = BASS.BASS_StreamGetFilePosition(mChannelHandle, BASS.BASS_FILEPOS_DOWNLOAD);
+                int progress = (int) (100 * (1.0 * downloaded / total));
+                sbTrackProgress.setSecondaryProgress(progress);
+            }
+        }
+    };
 
     private void onTrackPlay() {
         if (mChannelHandle == 0) {
@@ -168,6 +223,10 @@ public class SampleActivity extends AppCompatActivity
         Button btnStop = ((Button) findViewById(R.id.btnStop));
         if (btnStop != null) {
             btnStop.setOnClickListener(this);
+        }
+        Button btnLoadURL = ((Button) findViewById(R.id.btnLoadURL));
+        if (btnLoadURL != null) {
+            btnLoadURL.setOnClickListener(this);
         }
         SeekBar sbTrackProgress = ((SeekBar) findViewById(R.id.sbTrackProgress));
         if (sbTrackProgress != null) {

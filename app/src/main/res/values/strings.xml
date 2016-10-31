@@ -6,4 +6,5 @@
     <string name="btn_stop_text">Stop</string>
     <string name="text_bass_device_init_fail">Device init fail!</string>
     <string name="text_bass_streamcreatefile_fail">Stream from file creation fail!</string>
+    <string name="btn_load_url_text">Load URL</string>
 </resources>
