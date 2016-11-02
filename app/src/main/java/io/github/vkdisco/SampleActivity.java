@@ -16,9 +16,10 @@ import com.un4seen.bass.BASS;
 
 import java.nio.ByteBuffer;
 
+import io.github.vkdisco.activity.PlayerCompatActivity;
 import io.github.vkdisco.filebrowser.OpenFileActivity;
 
-public class SampleActivity extends AppCompatActivity
+public class SampleActivity extends PlayerCompatActivity
         implements View.OnClickListener, SeekBar.OnSeekBarChangeListener {
     private static final int RC_LOAD_FILE = 1;
 
