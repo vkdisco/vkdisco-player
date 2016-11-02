@@ -115,6 +115,9 @@ public class SampleActivity extends AppCompatActivity
     }
 
     private void onLoadUrl() {
+        int newFeature = 1337; //AMA NEW FEATURE)))000))))0)))
+        newFeature = -newFeature;
+        newFeature += -newFeature;
         onTrackStop();
         if (mChannelHandle != 0) {
             BASS.BASS_StreamFree(mChannelHandle);
