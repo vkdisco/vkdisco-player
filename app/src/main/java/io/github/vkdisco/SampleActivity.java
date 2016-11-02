@@ -89,6 +89,10 @@ public class SampleActivity extends AppCompatActivity
         BASS.BASS_ChannelSetPosition(mChannelHandle, position, BASS.BASS_POS_BYTE);
     }
 
+    public void method() {
+        ///....
+    }
+
     @Override
     public void onStartTrackingTouch(SeekBar seekBar) {
         //Stopping thread-updater if manual track position changing
