@@ -10,6 +10,7 @@ import com.vk.sdk.VKSdk;
 /**
  * Created by tkaczenko on 30.10.16.
  */
+
 public class Application extends android.app.Application {
 
     // Handling of AccessToken

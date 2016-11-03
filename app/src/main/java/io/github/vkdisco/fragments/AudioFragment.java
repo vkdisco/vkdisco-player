@@ -9,7 +9,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.api.VKApi;
@@ -31,7 +30,7 @@ import io.github.vkdisco.models.Audio;
  * Created by tkaczenko on 30.10.16.
  */
 
-public class UserAudioFragment extends Fragment {
+public class AudioFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private AudioAdapter mAdapter;
     private List<Audio> mItems;
@@ -58,18 +57,17 @@ public class UserAudioFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_user_audio, container, false);
-        mRecyclerView = (RecyclerView) v.findViewById(R.id.rvPopular);
+        mRecyclerView = (RecyclerView) v.findViewById(R.id.rvAudio);
 
         RecyclerView.LayoutManager manager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(manager);
 
         mItems = new ArrayList<>();
 
-        /*VKApi.audio().getPopular(VKParameters.from(VKApiConst.COUNT, 50));
-        popular*/
-
-        VKRequest popular = VKApi.audio().get(VKParameters.from(VKApiConst.USER_ID, VKAccessToken.USER_ID));
-        popular.executeWithListener(new VKRequest.VKRequestListener() {
+        int id = getArguments().getInt("id");
+        VKRequest vkRequest = VKApi.audio().get(VKParameters.from(VKApiConst.USER_ID,
+                (id == 0) ? VKAccessToken.USER_ID : id));
+        vkRequest.executeWithListener(new VKRequest.VKRequestListener() {
             @Override
             public void onComplete(VKResponse response) {
                 super.onComplete(response);
@@ -83,7 +81,6 @@ public class UserAudioFragment extends Fragment {
                 mAdapter = new AudioAdapter(mItems, new AudioAdapter.OnItemClickListener() {
                     @Override
                     public void onItemClick(Audio item) {
-                        Toast.makeText(getContext(), "Click on: " + item.getUrl(), Toast.LENGTH_SHORT).show();
                         mListener.onAudioSelected(item.getUrl());
                     }
                 });

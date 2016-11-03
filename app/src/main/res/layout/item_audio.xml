@@ -37,7 +37,8 @@
             android:id="@+id/time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toLeftOf="@+id/action_play"
+            android:layout_alignParentEnd="false"
+            android:layout_alignParentRight="true"
             android:text="Time"
             android:textColor="@color/colorPrimary"
             android:textSize="12sp" />
@@ -47,18 +48,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/time"
+            android:layout_alignParentRight="true"
             android:layout_marginTop="3dp"
-            android:layout_toLeftOf="@+id/action_play"
             android:text="00:00"
             android:textColor="@android:color/darker_gray" />
-
-        <ImageButton
-            android:id="@+id/action_play"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="false"
-            android:layout_alignParentRight="true"
-            android:src="@android:drawable/ic_media_play" />
 
     </RelativeLayout>
 

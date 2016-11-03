@@ -48,7 +48,6 @@ public class AudioAdapter extends RecyclerView.Adapter<AudioAdapter.PopularViewH
 
     public class PopularViewHolder extends RecyclerView.ViewHolder {
         TextView title, artist, time, curPos;
-        ImageButton play;
 
         public PopularViewHolder(View item) {
             super(item);
@@ -56,14 +55,13 @@ public class AudioAdapter extends RecyclerView.Adapter<AudioAdapter.PopularViewH
             artist = (TextView) item.findViewById(R.id.tv_artist);
             time = (TextView) item.findViewById(R.id.tv_time);
             curPos = (TextView) item.findViewById(R.id.time);
-            play = (ImageButton) item.findViewById(R.id.action_play);
         }
 
         public void bind(final Audio audio, final OnItemClickListener listener) {
             title.setText(audio.getTitle());
             artist.setText(audio.getArtist());
             time.setText(audio.getTime());
-            play.setOnClickListener(new View.OnClickListener() {
+            this.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     listener.onItemClick(audio);

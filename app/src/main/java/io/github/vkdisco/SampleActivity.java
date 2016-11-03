@@ -3,6 +3,8 @@ package io.github.vkdisco;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -18,12 +20,13 @@ import com.vk.sdk.VKSdk;
 import com.vk.sdk.api.VKError;
 
 import io.github.vkdisco.filebrowser.OpenFileActivity;
-import io.github.vkdisco.fragments.UserAudioFragment;
+import io.github.vkdisco.fragments.AudioFragment;
+import io.github.vkdisco.fragments.FriendDialogFragment;
 
 public class SampleActivity extends AppCompatActivity
         implements View.OnClickListener,
         SeekBar.OnSeekBarChangeListener,
-        UserAudioFragment.OnAudioSelectedListener {
+        AudioFragment.OnAudioSelectedListener, FriendDialogFragment.OnFriendSelectedListener {
     private static final int RC_LOAD_FILE = 1;
 
     private int mChannelHandle = 0;
@@ -33,9 +36,12 @@ public class SampleActivity extends AppCompatActivity
 
     private Button btnLogin;
     private Button btnLogout;
+    private Button btnChooseFriend;
     private boolean isResumed = false;
+
     // Custom scope for our app
     private static final String[] sScope = new String[]{
+            VKScope.FRIENDS,
             VKScope.AUDIO,
             VKScope.NOHTTPS,
     };
@@ -48,11 +54,10 @@ public class SampleActivity extends AppCompatActivity
         initViews(); //Views initialization
 
         if (savedInstanceState == null) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .add(R.id.fragment_container, new UserAudioFragment())
-                    .commit();
+            showAudioFragment(0);
         }
+
+        btnLogin.setVisibility(View.VISIBLE);
 
         // Checking of logging in VK
         VKSdk.wakeUpSession(this, new VKCallback<VKSdk.LoginState>() {
@@ -65,6 +70,7 @@ public class SampleActivity extends AppCompatActivity
                             break;
                         case LoggedIn:
                             btnLogout.setVisibility(View.VISIBLE);
+                            btnChooseFriend.setVisibility(View.VISIBLE);
                             break;
                         case Pending:
                             break;
@@ -95,7 +101,8 @@ public class SampleActivity extends AppCompatActivity
         isResumed = true;
         if (VKSdk.isLoggedIn()) {
             btnLogout.setVisibility(View.VISIBLE);
-            showPopular();
+            btnChooseFriend.setVisibility(View.VISIBLE);
+            showAudioFragment(0);
         }
     }
 
@@ -112,7 +119,8 @@ public class SampleActivity extends AppCompatActivity
             public void onResult(VKAccessToken res) {
                 btnLogin.setVisibility(View.INVISIBLE);
                 btnLogout.setVisibility(View.VISIBLE);
-                showPopular();
+                btnChooseFriend.setVisibility(View.VISIBLE);
+                showAudioFragment(0);
             }
 
             @Override
@@ -147,20 +155,28 @@ public class SampleActivity extends AppCompatActivity
                 break;
             case R.id.btnStop:
                 onTrackStop();
+                break;
             case R.id.btnLogIn:
                 VKSdk.login(this, sScope);
-                if (VKSdk.isLoggedIn()) {
-                    btnLogin.setVisibility(View.INVISIBLE);
-                }
                 break;
             case R.id.btnLogOut:
                 VKSdk.logout();
                 if (!VKSdk.isLoggedIn()) {
+                    btnLogin.setVisibility(View.VISIBLE);
                     btnLogout.setVisibility(View.INVISIBLE);
-                    showPopular();
+                    btnChooseFriend.setVisibility(View.INVISIBLE);
+                    showAudioFragment(0);
                 }
                 break;
+            case R.id.btnChooseFriend:
+                showFriendDialog();
+                break;
         }
+    }
+
+    private void showFriendDialog() {
+        DialogFragment fragment = new FriendDialogFragment();
+        fragment.show(getSupportFragmentManager(), "friends_dialog");
     }
 
     @Override
@@ -231,10 +247,14 @@ public class SampleActivity extends AppCompatActivity
         BASS.BASS_ChannelSetPosition(mChannelHandle, 0, BASS.BASS_POS_BYTE);
     }
 
-    private void showPopular() {
+    private void showAudioFragment(int id) {
+        Fragment fragment = new AudioFragment();
+        Bundle args = new Bundle();
+        args.putInt("id", id);
+        fragment.setArguments(args);
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.fragment_container, new UserAudioFragment())
+                .replace(R.id.fragment_container, fragment)
                 .commitAllowingStateLoss();
     }
 
@@ -274,6 +294,10 @@ public class SampleActivity extends AppCompatActivity
         btnLogout = (Button) findViewById(R.id.btnLogOut);
         if (btnLogout != null) {
             btnLogout.setOnClickListener(this);
+        }
+        btnChooseFriend = (Button) findViewById(R.id.btnChooseFriend);
+        if (btnChooseFriend != null) {
+            btnChooseFriend.setOnClickListener(this);
         }
         SeekBar sbTrackProgress = ((SeekBar) findViewById(R.id.sbTrackProgress));
         if (sbTrackProgress != null) {
@@ -386,6 +410,11 @@ public class SampleActivity extends AppCompatActivity
     @Override
     public void onAudioSelected(String url) {
         loadFileByURL(url);
+    }
+
+    @Override
+    public void onFriendSelected(int id) {
+        showAudioFragment(id);
     }
 
     /**

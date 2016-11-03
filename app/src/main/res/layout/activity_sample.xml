@@ -70,13 +70,21 @@
         android:id="@+id/btnLogIn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/btn_log_in_text" />
+        android:text="@string/btn_log_in_text"
+        android:visibility="invisible" />
 
     <Button
         android:id="@+id/btnLogOut"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/btn_log_out_text"
+        android:visibility="invisible" />
+
+    <Button
+        android:id="@+id/btnChooseFriend"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_choose_friend"
         android:visibility="invisible" />
 
     <FrameLayout
