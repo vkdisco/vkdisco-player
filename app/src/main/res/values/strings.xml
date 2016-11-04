@@ -1,9 +1,13 @@
 <resources>
     <string name="app_name">vkDisco</string>
+    <integer name="com_vk_sdk_AppId">5666525</integer>
     <string name="btn_load_file_text">Load file</string>
     <string name="btn_play_text">Play</string>
     <string name="btn_pause_text">Pause</string>
     <string name="btn_stop_text">Stop</string>
     <string name="text_bass_device_init_fail">Device init fail!</string>
     <string name="text_bass_streamcreatefile_fail">Stream from file creation fail!</string>
+    <string name="btn_log_in_text">Sign in VK</string>
+    <string name="btn_log_out_text">Logout</string>
+    <string name="btn_choose_friend">Choose a friend</string>
 </resources>

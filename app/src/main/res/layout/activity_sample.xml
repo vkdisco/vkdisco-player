@@ -1,39 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:padding="5dp">
+
     <Button
         android:id="@+id/btnLoadFile"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/btn_load_file_text"/>
+        android:text="@string/btn_load_file_text" />
+
     <LinearLayout
-        android:orientation="horizontal"
+        style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
         <Button
             android:id="@+id/btnPlay"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:enabled="false"
-            android:text="@string/btn_play_text"/>
+            android:text="@string/btn_play_text" />
+
         <Button
             android:id="@+id/btnPause"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:enabled="false"
-            android:text="@string/btn_pause_text"/>
+            android:text="@string/btn_pause_text" />
+
         <Button
             android:id="@+id/btnStop"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:enabled="false"
-            android:text="@string/btn_stop_text"/>
+            android:text="@string/btn_stop_text" />
     </LinearLayout>
+
+    <SeekBar
+        android:id="@+id/sbTrackProgress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:progress="0" />
+
+    <ProgressBar
+        android:id="@+id/pbIndicationLeft"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="false" />
+
+    <ProgressBar
+        android:id="@+id/pbIndicationRight"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="false" />
+
+    <Button
+        android:id="@+id/btnLogIn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_log_in_text"
+        android:visibility="invisible" />
+
+    <Button
+        android:id="@+id/btnLogOut"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_log_out_text"
+        android:visibility="invisible" />
+
+    <Button
+        android:id="@+id/btnChooseFriend"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_choose_friend"
+        android:visibility="invisible" />
+
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true" />
 </LinearLayout>

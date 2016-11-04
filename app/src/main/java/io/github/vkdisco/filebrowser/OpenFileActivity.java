@@ -1,3 +1,8 @@
+/**
+ * ------------------------!WARNING!-----------------------------
+ * THIS CLASS AND FileBrowserAdapter.java WILL BE DELETED AS SOON AS POSSIBLE!
+ */
+
 package io.github.vkdisco.filebrowser;
 
 import android.content.Intent;
@@ -14,6 +19,7 @@ import java.util.List;
 
 import io.github.vkdisco.R;
 
+@Deprecated
 public class OpenFileActivity extends AppCompatActivity implements ListView.OnItemClickListener{
     public static final String PACKAGE_NAME = "io.github.vkdisco";
     public static final String EXTRA_FILENAME = PACKAGE_NAME.concat(".EXTRA_FILENAME");
