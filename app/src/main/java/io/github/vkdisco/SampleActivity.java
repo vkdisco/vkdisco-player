@@ -17,7 +17,15 @@ import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.VKCallback;
 import com.vk.sdk.VKScope;
 import com.vk.sdk.VKSdk;
+import com.vk.sdk.api.VKApi;
 import com.vk.sdk.api.VKError;
+import com.vk.sdk.api.VKParameters;
+import com.vk.sdk.api.VKRequest;
+import com.vk.sdk.api.VKResponse;
+import com.vk.sdk.api.model.VKApiAudio;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import io.github.vkdisco.filebrowser.OpenFileActivity;
 import io.github.vkdisco.fragments.AudioFragment;
@@ -408,8 +416,50 @@ public class SampleActivity extends AppCompatActivity
     }
 
     @Override
-    public void onAudioSelected(String url) {
-        loadFileByURL(url);
+    public void onAudioSelected(int ownerId, int id) {
+        VKRequest request = VKApi.audio().getById(VKParameters.from("audios", ownerId + "_" + id));
+        request.executeWithListener(new VKRequest.VKRequestListener() {
+            @Override
+            public void onComplete(VKResponse response) {
+                JSONArray items = null;
+                try {
+                    items = response.json.getJSONArray("response");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                JSONObject json;
+                VKApiAudio vkApiAudio;
+                json = null;
+                try {
+                    json = items.getJSONObject(0);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                vkApiAudio = new VKApiAudio();
+                vkApiAudio.parse(json);
+
+                loadFileByURL(vkApiAudio.url);
+            }
+
+            @Override
+            public void attemptFailed(VKRequest request, int attemptNumber, int totalAttempts) {
+                super.attemptFailed(request, attemptNumber, totalAttempts);
+                Toast.makeText(getBaseContext(), "Attempt", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(VKError error) {
+                super.onError(error);
+                Toast.makeText(getBaseContext(), error.toString(), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onProgress(VKRequest.VKProgressType progressType, long bytesLoaded, long bytesTotal) {
+                super.onProgress(progressType, bytesLoaded, bytesTotal);
+                Toast.makeText(getBaseContext(), "PROgress", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override

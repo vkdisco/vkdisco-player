@@ -38,7 +38,7 @@ public class AudioFragment extends Fragment {
     private OnAudioSelectedListener mListener;
 
     public interface OnAudioSelectedListener {
-        void onAudioSelected(String url);
+        void onAudioSelected(int ownerID, int id);
     }
 
     @Override
@@ -75,13 +75,13 @@ public class AudioFragment extends Fragment {
 
                 for (VKApiAudio audio : list) {
                     mItems.add(new Audio(
-                            audio.title, audio.url, audio.artist, audio.duration));
+                            audio.owner_id, audio.id, audio.title, audio.url, audio.artist, audio.duration));
                 }
 
                 mAdapter = new AudioAdapter(mItems, new AudioAdapter.OnItemClickListener() {
                     @Override
                     public void onItemClick(Audio item) {
-                        mListener.onAudioSelected(item.getUrl());
+                        mListener.onAudioSelected(item.getOwnerID(), item.getTrackID());
                     }
                 });
                 mRecyclerView.setAdapter(mAdapter);

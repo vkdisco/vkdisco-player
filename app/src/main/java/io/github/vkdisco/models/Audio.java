@@ -5,13 +5,17 @@ package io.github.vkdisco.models;
  */
 
 public class Audio {
+    private int ownerID;
+    private int trackID;
     private String title;
     private String url;
     private String artist;
     private String formatTime;
     private int time;
 
-    public Audio(String title, String url, String artist, int time) {
+    public Audio(int ownerID, int trackID, String title, String url, String artist, int time) {
+        this.ownerID = ownerID;
+        this.trackID = trackID;
         this.title = title;
         this.url = url;
         this.artist = artist;
@@ -55,5 +59,21 @@ public class Audio {
 
     public void setTime(int time) {
         this.time = time;
+    }
+
+    public int getOwnerID() {
+        return ownerID;
+    }
+
+    public void setOwnerID(int ownerID) {
+        this.ownerID = ownerID;
+    }
+
+    public int getTrackID() {
+        return trackID;
+    }
+
+    public void setTrackID(int trackID) {
+        this.trackID = trackID;
     }
 }
