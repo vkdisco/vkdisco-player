@@ -27,7 +27,25 @@ public class FileTrack extends Track {
         this.file = new File(path);
     }
 
-    public void loadFromFile() {
+    @Override
+    public void loadRequest() {
+        loadFromFile();
+        getOnTrackLoadedListener().onLoad(this);
+    }
+
+    @Override
+    public String serialize() {
+        //// TODO: 11.11.16 Implement serialize FileTrack
+        return null;
+    }
+
+    @Override
+    public String deserialize() {
+        //// TODO: 11.11.16 Implement deserialize VKTrack
+        return null;
+    }
+
+    private void loadFromFile() {
         if (file == null) {
             return;
         }
@@ -72,5 +90,15 @@ public class FileTrack extends Track {
             metaData.setAlbumArt(bitmap);
         }
         return metaData;
+    }
+
+    @Override
+    public boolean isRemote() {
+        return false;
+    }
+
+    @Override
+    public boolean isCanBeCached() {
+        return false;
     }
 }

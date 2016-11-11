@@ -27,7 +27,25 @@ public class VKTrack extends Track {
         this.ownerID = ownerID;
     }
 
-    public void loadFromURL() {
+    @Override
+    public void loadRequest() {
+        loadFromURL();
+        getOnTrackLoadedListener().onLoad(this);
+    }
+
+    @Override
+    public String serialize() {
+        //// TODO: 11.11.16 Implement serialize VKTrack
+        return null;
+    }
+
+    @Override
+    public String deserialize() {
+        //// TODO: 11.11.16 Implement deserialize VKTrack
+        return null;
+    }
+
+    private void loadFromURL() {
         VKRequest request = VKApi.audio().getById(VKParameters.from("audios", ownerID + "_" + id));
         request.executeWithListener(new VKRequest.VKRequestListener() {
             @Override
@@ -42,7 +60,7 @@ public class VKTrack extends Track {
                         vkAudio = new VKApiAudio();
                         vkAudio.parse(json);
                         setMetaData(getTrackMetaData(vkAudio));
-                        load(vkAudio.url);
+                        loadFromUrl(vkAudio.url);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -53,7 +71,7 @@ public class VKTrack extends Track {
         });
     }
 
-    private void load(String url) {
+    private void loadFromUrl(String url) {
         int channelHandle = BASS.BASS_StreamCreateURL(url, 0, 0, null, 0);
         setChannelHandle(channelHandle);
     }
@@ -68,6 +86,16 @@ public class VKTrack extends Track {
         metaData.setAlbumArt();
 */
         return metaData;
+    }
+
+    @Override
+    public boolean isRemote() {
+        return true;
+    }
+
+    @Override
+    public boolean isCanBeCached() {
+        return true;
     }
 
     public int getId() {

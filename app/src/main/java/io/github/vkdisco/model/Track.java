@@ -8,7 +8,7 @@ import com.un4seen.bass.BASS;
 
 public abstract class Track {
     private TrackMetaData metaData;
-    private int channelHandle;
+    private int channelHandle = 0;
     private OnTrackLoadedListener onTrackLoadedListener;
 
     public Track(TrackMetaData metaData, int channelHandle,
@@ -18,41 +18,26 @@ public abstract class Track {
         this.onTrackLoadedListener = onTrackLoadedListener;
     }
 
-    public void loadRequest() {
-        //// TODO: 11.11.16 Implement
-    }
+    abstract public void loadRequest();
 
-    public String serialize() {
-        //// TODO: 11.11.16 Implement
-        return null;
-    }
+    abstract public String serialize();
 
-    public String deserialize() {
-        //// TODO: 11.11.16 Impelement
-        return null;
-    }
+    abstract public String deserialize();
 
-    public void free() {
-        BASS.BASS_StreamFree(channelHandle);
-    }
+    abstract public boolean isRemote();
 
-    public boolean isRemote() {
-        //// TODO: 11.11.16 Impelement
-        return false;
-    }
-
-    public boolean isCanBeCached() {
-        //// TODO: 11.11.16 Implement
-        return false;
-    }
+    abstract public boolean isCanBeCached();
 
     public boolean isOk() {
-        //// TODO: 11.11.16 Implement
-        return false;
+        return (channelHandle != 0);
     }
 
     public interface OnTrackLoadedListener {
         void onLoad(Track track);
+    }
+
+    public void free() {
+        BASS.BASS_StreamFree(channelHandle);
     }
 
     public TrackMetaData getMetaData() {
