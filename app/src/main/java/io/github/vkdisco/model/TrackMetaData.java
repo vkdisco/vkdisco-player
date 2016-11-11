@@ -5,7 +5,7 @@ import android.graphics.Bitmap;
 /**
  * Created by tkaczenko on 11.11.16.
  */
-
+//// FIXME: 11.11.16 Review metadata
 public class TrackMetaData {
     private String title;
     private String artist;

@@ -5,11 +5,15 @@ import com.un4seen.bass.BASS;
 /**
  * Created by tkaczenko on 10.11.16.
  */
-
+//// TODO: 11.11.16 Review the all implementations
 public abstract class Track {
     private TrackMetaData metaData;
     private int channelHandle = 0;
     private OnTrackLoadedListener onTrackLoadedListener;
+
+    public Track(TrackMetaData metaData) {
+
+    }
 
     public Track(TrackMetaData metaData, int channelHandle,
                  OnTrackLoadedListener onTrackLoadedListener) {
@@ -22,7 +26,7 @@ public abstract class Track {
 
     abstract public String serialize();
 
-    abstract public String deserialize();
+    abstract public Track deserialize(String srcPath);
 
     abstract public boolean isRemote();
 
