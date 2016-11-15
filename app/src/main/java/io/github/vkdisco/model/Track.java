@@ -5,7 +5,7 @@ import com.un4seen.bass.BASS;
 /**
  * Created by tkaczenko on 10.11.16.
  */
-//// TODO: 11.11.16 Review the all implementations
+
 public abstract class Track {
     private TrackMetaData metaData;
     private int channelHandle = 0;
