@@ -6,5 +6,8 @@ package io.github.vkdisco.player;
  */
 
 public enum PlayerState {
-    // TODO: 16.11.2016 Implement this
+    PLAYING,
+    PAUSED,
+    STOPPED,
+    EMPTY
 }
