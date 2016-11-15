@@ -11,8 +11,12 @@ public abstract class Track {
     private int channelHandle = 0;
     private OnTrackLoadedListener onTrackLoadedListener;
 
-    public Track(TrackMetaData metaData) {
+    public Track() {
 
+    }
+
+    public Track(TrackMetaData metaData) {
+        this.metaData = metaData;
     }
 
     public Track(TrackMetaData metaData, int channelHandle,
@@ -23,10 +27,6 @@ public abstract class Track {
     }
 
     abstract public void loadRequest();
-
-    abstract public String serialize();
-
-    abstract public Track deserialize(String srcPath);
 
     abstract public boolean isRemote();
 
