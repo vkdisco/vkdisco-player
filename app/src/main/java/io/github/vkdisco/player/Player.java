@@ -5,6 +5,7 @@ import com.un4seen.bass.BASS;
 import io.github.vkdisco.model.Track;
 import io.github.vkdisco.model.TrackMetaData;
 import io.github.vkdisco.player.interfaces.OnPlayerStateChangedListener;
+import io.github.vkdisco.player.interfaces.OnTrackEndListener;
 import io.github.vkdisco.player.interfaces.OnTrackSwitchListener;
 
 /**
@@ -14,10 +15,10 @@ import io.github.vkdisco.player.interfaces.OnTrackSwitchListener;
 
 // TODO: 16.11.2016 Implement OnTrackLoadedListener
 public class Player {
-    private Track currentTrack;
+    private Track currentTrack = null;
 //    private Playlist playlist;
-    private int trackSyncEnd;
-//    private TrackEndNotifier trackEndNotifier;
+    private int trackSyncEnd = 0;
+    private TrackEndNotifier trackEndNotifier = new TrackEndNotifier();
     private PlayerState state;
     private OnPlayerStateChangedListener stateChangedListener;
     private OnTrackSwitchListener trackSwitchListener;
@@ -162,6 +163,8 @@ public class Player {
         this.stateChangedListener = stateChangedListener;
     }
 
+    // TODO: 16.11.2016 Implement onTrackLoaded(); in onTrackLoaded() set BASS_SYNC_END on channel
+
     private void setState(PlayerState state) {
         this.state = state;
         if (stateChangedListener != null) {
@@ -183,12 +186,27 @@ public class Player {
             return;
         }
         stop();
+        if (trackSyncEnd != 0) {
+            BASS.BASS_ChannelRemoveSync(currentTrack.getChannelHandle(), trackSyncEnd);
+            trackSyncEnd = 0;
+        }
         currentTrack.free();
     }
 
     private void trackSwitched() {
         if (trackSwitchListener != null) {
             trackSwitchListener.onTrackSwitch();
+        }
+    }
+
+    public static class TrackEndNotifier implements BASS.SYNCPROC {
+        private OnTrackEndListener trackEndListener;
+
+        @Override
+        public void SYNCPROC(int handle, int channel, int data, Object user) {
+            if (trackEndListener != null) {
+                trackEndListener.onTrackEnd();
+            }
         }
     }
 }
