@@ -19,14 +19,32 @@ public class Player {
 //    private Playlist playlist;
     private int trackSyncEnd = 0;
     private TrackEndNotifier trackEndNotifier = new TrackEndNotifier();
-    private PlayerState state;
+    private PlayerState state = PlayerState.EMPTY;
     private OnPlayerStateChangedListener stateChangedListener;
     private OnTrackSwitchListener trackSwitchListener;
 
     public void play() {
+        if (currentTrack == null) {
+            nextTrack();
+        }
+        if (!currentTrack.isOk()) {
+            loadTrack();
+        } else {
+            BASS.BASS_ChannelPlay(currentTrack.getChannelHandle(), false);
+            setState(PlayerState.PLAYING);
+//            playAfterLoad = true;
+        }
     }
 
     public void pause() {
+        if (currentTrack == null) {
+            return;
+        }
+        if (!currentTrack.isOk()) {
+            return;
+        }
+        BASS.BASS_ChannelPause(currentTrack.getChannelHandle());
+        setState(PlayerState.PAUSED);
     }
 
     public void stop() {
@@ -38,6 +56,7 @@ public class Player {
         }
         BASS.BASS_ChannelStop(currentTrack.getChannelHandle());
         BASS.BASS_ChannelSetPosition(currentTrack.getChannelHandle(), 0, BASS.BASS_POS_BYTE);
+        setState(PlayerState.STOPPED);
     }
 
     public PlayerState getState() {
@@ -60,10 +79,9 @@ public class Player {
     }
 
     public boolean playTrack(int index) {
-        // TODO: 16.11.2016 Implement this
-//        stop();
 //        freeTrack();
 //        trackSwitched();
+        // TODO: 16.11.2016 Implement this
         return false;
     }
 
@@ -148,10 +166,12 @@ public class Player {
     }
 
     public void nextTrack() {
+        freeTrack();
         // TODO: 16.11.2016 Implement this
     }
 
     public void previousTrack() {
+        freeTrack();
         // TODO: 16.11.2016 Implement this
     }
 
@@ -163,7 +183,7 @@ public class Player {
         this.stateChangedListener = stateChangedListener;
     }
 
-    // TODO: 16.11.2016 Implement onTrackLoaded(); in onTrackLoaded() set BASS_SYNC_END on channel
+    // TODO: 16.11.2016 Implement onTrackLoaded(); in onTrackLoaded() call loadTrack() and set BASS_SYNC_END on channel
 
     private void setState(PlayerState state) {
         this.state = state;
@@ -191,6 +211,7 @@ public class Player {
             trackSyncEnd = 0;
         }
         currentTrack.free();
+        setState(PlayerState.EMPTY);
     }
 
     private void trackSwitched() {
