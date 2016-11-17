@@ -9,7 +9,7 @@ import com.un4seen.bass.BASS;
 public abstract class Track {
     private TrackMetaData metaData;
     private int channelHandle = 0;
-    private OnTrackLoadedListener onTrackLoadedListener;
+    private OnTrackDataLoadedListener onTrackDataLoadedListener;
 
     public Track() {
 
@@ -20,24 +20,22 @@ public abstract class Track {
     }
 
     public Track(TrackMetaData metaData, int channelHandle,
-                 OnTrackLoadedListener onTrackLoadedListener) {
+                 OnTrackDataLoadedListener onTrackDataLoadedListener) {
         this.metaData = metaData;
         this.channelHandle = channelHandle;
-        this.onTrackLoadedListener = onTrackLoadedListener;
+        this.onTrackDataLoadedListener = onTrackDataLoadedListener;
     }
 
-    abstract public void loadRequest();
+    abstract public void requestDataLoad();
+
+    abstract public boolean load();
 
     abstract public boolean isRemote();
 
     abstract public boolean isCanBeCached();
 
-    public boolean isOk() {
+    public boolean isLoaded() {
         return (channelHandle != 0);
-    }
-
-    public interface OnTrackLoadedListener {
-        void onLoad(Track track);
     }
 
     public void free() {
@@ -48,23 +46,27 @@ public abstract class Track {
         return metaData;
     }
 
-    public void setMetaData(TrackMetaData metaData) {
-        this.metaData = metaData;
-    }
-
     public int getChannelHandle() {
         return channelHandle;
     }
 
-    public void setChannelHandle(int channelHandle) {
+    public void setOnTrackDataLoadedListener(OnTrackDataLoadedListener onTrackDataLoadedListener) {
+        this.onTrackDataLoadedListener = onTrackDataLoadedListener;
+    }
+
+    protected void setMetaData(TrackMetaData metaData) {
+        this.metaData = metaData;
+    }
+
+    protected void setChannelHandle(int channelHandle) {
         this.channelHandle = channelHandle;
     }
 
-    public OnTrackLoadedListener getOnTrackLoadedListener() {
-        return onTrackLoadedListener;
+    protected OnTrackDataLoadedListener getOnTrackDataLoadedListener() {
+        return onTrackDataLoadedListener;
     }
 
-    public void setOnTrackLoadedListener(OnTrackLoadedListener onTrackLoadedListener) {
-        this.onTrackLoadedListener = onTrackLoadedListener;
+    public interface OnTrackDataLoadedListener {
+        void onTrackDataLoaded(boolean success);
     }
 }

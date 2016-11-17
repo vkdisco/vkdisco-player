@@ -20,13 +20,13 @@ public class FileTrack extends Track {
     }
 
     public FileTrack(TrackMetaData metaData, int channelHandle,
-                     OnTrackLoadedListener onTrackLoadedListener, File file) {
+                     OnTrackDataLoadedListener onTrackLoadedListener, File file) {
         super(metaData, channelHandle, onTrackLoadedListener);
         this.file = file;
     }
 
     public FileTrack(TrackMetaData metaData, int channelHandle,
-                     OnTrackLoadedListener onTrackLoadedListener, String path) {
+                     OnTrackDataLoadedListener onTrackLoadedListener, String path) {
         super(metaData, channelHandle, onTrackLoadedListener);
         this.file = new File(path);
     }
@@ -37,21 +37,28 @@ public class FileTrack extends Track {
     }
 
     @Override
-    public void loadRequest() {
-        loadFromFile();
-        getOnTrackLoadedListener().onLoad(this);
+    public void requestDataLoad() {
+        String filePath = file.getAbsolutePath();
+        setMetaData(getTrackMetaData(filePath));
+        if (getOnTrackDataLoadedListener() != null) {
+            getOnTrackDataLoadedListener().onTrackDataLoaded(true);
+        }
     }
 
-    private void loadFromFile() {
+    @Override
+    public boolean load() {
+        return loadFromFile();
+    }
+
+    private boolean loadFromFile() {
         if (file == null) {
-            return;
+            return false;
         }
 
         String filePath = file.getAbsolutePath();
         int channelHandle = BASS.BASS_StreamCreateFile(filePath, 0, 0, 0);
         setChannelHandle(channelHandle);
-
-        setMetaData(getTrackMetaData(filePath));
+        return channelHandle != 0;
     }
 
     private TrackMetaData getTrackMetaData(String path) {

@@ -19,13 +19,14 @@ public class VKTrack extends Track {
     private int id;
     private int ownerID;
     private boolean isCached;
+    private String url;
 
     public VKTrack() {
 
     }
 
     public VKTrack(TrackMetaData metaData, int channelHandle,
-                   OnTrackLoadedListener onTrackLoadedListener, int id, int ownerID) {
+                   OnTrackDataLoadedListener onTrackLoadedListener, int id, int ownerID) {
         super(metaData, channelHandle, onTrackLoadedListener);
         this.id = id;
         this.ownerID = ownerID;
@@ -38,12 +39,19 @@ public class VKTrack extends Track {
     }
 
     @Override
-    public void loadRequest() {
-        loadFromURL();
-        getOnTrackLoadedListener().onLoad(this);
+    public void requestDataLoad() {
+        loadDataFromVk();
     }
 
-    private void loadFromURL() {
+    @Override
+    public boolean load() {
+        if (url == null) {
+            return false;
+        }
+        return loadFromUrl(url);
+    }
+
+    private void loadDataFromVk() {
         VKRequest request = VKApi.audio().getById(VKParameters.from("audios", ownerID + "_" + id));
         request.executeWithListener(new VKRequest.VKRequestListener() {
             @Override
@@ -58,7 +66,10 @@ public class VKTrack extends Track {
                         vkAudio = new VKApiAudio();
                         vkAudio.parse(json);
                         setMetaData(getTrackMetaData(vkAudio));
-                        loadFromUrl(vkAudio.url);
+                        url = vkAudio.url;
+                        if (getOnTrackDataLoadedListener() != null) {
+                            getOnTrackDataLoadedListener().onTrackDataLoaded(true);
+                        }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -69,9 +80,10 @@ public class VKTrack extends Track {
         });
     }
 
-    private void loadFromUrl(String url) {
+    private boolean loadFromUrl(String url) {
         int channelHandle = BASS.BASS_StreamCreateURL(url, 0, 0, null, 0);
         setChannelHandle(channelHandle);
+        return channelHandle != 0;
     }
 
     private TrackMetaData getTrackMetaData(VKApiAudio vkAudio) {
