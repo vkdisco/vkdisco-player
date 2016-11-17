@@ -23,6 +23,10 @@ public class Player implements Track.OnTrackDataLoadedListener, OnTrackEndListen
     private OnPlayerStateChangedListener stateChangedListener;
     private OnTrackSwitchListener trackSwitchListener;
 
+    public Player() {
+        trackEndNotifier.setTrackEndListener(this);
+    }
+
     public void play() {
         playAfterDataLoad = true;
         if (currentTrack == null) {
@@ -275,6 +279,10 @@ public class Player implements Track.OnTrackDataLoadedListener, OnTrackEndListen
             if (trackEndListener != null) {
                 trackEndListener.onTrackEnd();
             }
+        }
+
+        public void setTrackEndListener(OnTrackEndListener trackEndListener) {
+            this.trackEndListener = trackEndListener;
         }
     }
 }
