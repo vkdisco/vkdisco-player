@@ -13,27 +13,33 @@ import io.github.vkdisco.player.interfaces.OnTrackSwitchListener;
  * Implements player
  */
 
-// TODO: 16.11.2016 Implement OnTrackLoadedListener
-public class Player {
+public class Player implements Track.OnTrackLoadedListener {
+    //    private Playlist playlist;
     private Track currentTrack = null;
-//    private Playlist playlist;
-    private int trackSyncEnd = 0;
-    private TrackEndNotifier trackEndNotifier = new TrackEndNotifier();
     private PlayerState state = PlayerState.EMPTY;
+    private boolean playAfterLoad = false;
+    private TrackEndNotifier trackEndNotifier = new TrackEndNotifier();
+    private int trackSyncEnd = 0;
     private OnPlayerStateChangedListener stateChangedListener;
     private OnTrackSwitchListener trackSwitchListener;
 
     public void play() {
         if (currentTrack == null) {
-            nextTrack();
+//            if (playlist == null) {
+//                return;
+//            }
+//            switchTrack(playlist.getCurrentTrack());
+//            if (currentTrack == null) { // If getCurrentTrack() returned null then playlist is empty
+//                return;
+//            }
         }
         if (!currentTrack.isOk()) {
-            loadTrack();
-        } else {
-            BASS.BASS_ChannelPlay(currentTrack.getChannelHandle(), false);
-            setState(PlayerState.PLAYING);
-//            playAfterLoad = true;
+            playAfterLoad = true;
+            currentTrack.setOnTrackLoadedListener(this);
+            currentTrack.loadRequest();
+            return;
         }
+//        startPlaying();
     }
 
     public void pause() {
@@ -54,9 +60,7 @@ public class Player {
         if (!currentTrack.isOk()) {
             return;
         }
-        BASS.BASS_ChannelStop(currentTrack.getChannelHandle());
-        BASS.BASS_ChannelSetPosition(currentTrack.getChannelHandle(), 0, BASS.BASS_POS_BYTE);
-        setState(PlayerState.STOPPED);
+        stopPlaying();
     }
 
     public PlayerState getState() {
@@ -65,6 +69,9 @@ public class Player {
 
     public int getTrackLengthSeconds() {
         if (currentTrack == null) {
+            return -1;
+        }
+        if (!currentTrack.isOk()) {
             return -1;
         }
         long bytesLength = BASS.BASS_ChannelGetLength(currentTrack.getChannelHandle(), BASS.BASS_POS_BYTE);
@@ -76,13 +83,6 @@ public class Player {
             return -1;
         }
         return (int) secondsLength;
-    }
-
-    public boolean playTrack(int index) {
-//        freeTrack();
-//        trackSwitched();
-        // TODO: 16.11.2016 Implement this
-        return false;
     }
 
     public double getPosition() {
@@ -115,6 +115,19 @@ public class Player {
         BASS.BASS_ChannelSetPosition(currentTrack.getChannelHandle(), bytePosition, BASS.BASS_POS_BYTE);
     }
 
+    public boolean playTrack(int index) {
+        // TODO: 16.11.2016 Implement this
+        return false;
+    }
+
+    public void nextTrack() {
+        // TODO: 16.11.2016 Implement this
+    }
+
+    public void previousTrack() {
+        // TODO: 16.11.2016 Implement this
+    }
+
 //    public Playlist getPlaylist() {
 //        return playlist;
 //    }
@@ -130,10 +143,7 @@ public class Player {
         if (currentTrack == null) {
             return false;
         }
-        if (!currentTrack.isOk()) {
-            return false;
-        }
-        return currentTrack.isRemote();
+        return currentTrack.isOk() && currentTrack.isRemote();
     }
 
     public double getRemoteLoadedPercent() {
@@ -161,20 +171,6 @@ public class Player {
         return currentTrack.getMetaData();
     }
 
-    public void free() {
-        freeTrack();
-    }
-
-    public void nextTrack() {
-        freeTrack();
-        // TODO: 16.11.2016 Implement this
-    }
-
-    public void previousTrack() {
-        freeTrack();
-        // TODO: 16.11.2016 Implement this
-    }
-
     public void setTrackSwitchListener(OnTrackSwitchListener trackSwitchListener) {
         this.trackSwitchListener = trackSwitchListener;
     }
@@ -183,8 +179,6 @@ public class Player {
         this.stateChangedListener = stateChangedListener;
     }
 
-    // TODO: 16.11.2016 Implement onTrackLoaded(); in onTrackLoaded() call loadTrack() and set BASS_SYNC_END on channel
-
     private void setState(PlayerState state) {
         this.state = state;
         if (stateChangedListener != null) {
@@ -192,31 +186,66 @@ public class Player {
         }
     }
 
-    private void loadTrack() {
+    private void switchTrack(Track track) {
+        free();
+        if (track == null) {
+            return;
+        }
+        currentTrack = track;
+        if (trackSwitchListener != null) {
+            trackSwitchListener.onTrackSwitch();
+        }
+    }
+
+    public void free() {
+        if (currentTrack == null) {
+            return;
+        }
+        stopPlaying();
+        if (trackSyncEnd != 0) {
+            BASS.BASS_ChannelRemoveSync(currentTrack.getChannelHandle(), trackSyncEnd);
+        }
+        currentTrack.free();
+        currentTrack = null;
+    }
+
+    private void startPlaying() {
         if (currentTrack == null) {
             return;
         }
         if (!currentTrack.isOk()) {
-            currentTrack.loadRequest();
+            return;
         }
+        if (state == PlayerState.PLAYING) {
+            return;
+        }
+        BASS.BASS_ChannelPlay(currentTrack.getChannelHandle(), false);
+        setState(PlayerState.PLAYING);
     }
 
-    private void freeTrack() {
+    private void stopPlaying() {
         if (currentTrack == null) {
             return;
         }
-        stop();
-        if (trackSyncEnd != 0) {
-            BASS.BASS_ChannelRemoveSync(currentTrack.getChannelHandle(), trackSyncEnd);
-            trackSyncEnd = 0;
+        if (!currentTrack.isOk()) {
+            return;
         }
-        currentTrack.free();
-        setState(PlayerState.EMPTY);
+        if (state == PlayerState.STOPPED) {
+            return;
+        }
+        BASS.BASS_ChannelStop(currentTrack.getChannelHandle());
+        BASS.BASS_ChannelSetPosition(currentTrack.getChannelHandle(), 0, BASS.BASS_POS_BYTE);
+        setState(PlayerState.STOPPED);
     }
 
-    private void trackSwitched() {
-        if (trackSwitchListener != null) {
-            trackSwitchListener.onTrackSwitch();
+    @Override
+    public void onTrackLoaded(boolean success) {
+        if (!success) {
+            return;
+        }
+        trackSyncEnd = BASS.BASS_ChannelSetSync(currentTrack.getChannelHandle(), BASS.BASS_SYNC_END, 0, trackEndNotifier, null);
+        if (playAfterLoad) {
+            startPlaying();
         }
     }
 
