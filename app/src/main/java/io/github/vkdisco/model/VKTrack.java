@@ -40,7 +40,7 @@ public class VKTrack extends Track {
     @Override
     public void loadRequest() {
         loadFromURL();
-        getOnTrackLoadedListener().onLoad(this);
+//        getOnTrackLoadedListener().onLoad(this);
     }
 
     private void loadFromURL() {
@@ -72,6 +72,9 @@ public class VKTrack extends Track {
     private void loadFromUrl(String url) {
         int channelHandle = BASS.BASS_StreamCreateURL(url, 0, 0, null, 0);
         setChannelHandle(channelHandle);
+        if (getOnTrackLoadedListener() != null) {
+            getOnTrackLoadedListener().onTrackLoaded(channelHandle != 0);
+        }
     }
 
     private TrackMetaData getTrackMetaData(VKApiAudio vkAudio) {

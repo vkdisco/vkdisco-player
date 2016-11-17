@@ -39,7 +39,7 @@ public class FileTrack extends Track {
     @Override
     public void loadRequest() {
         loadFromFile();
-        getOnTrackLoadedListener().onLoad(this);
+//        getOnTrackLoadedListener().onTrackLoaded(true);
     }
 
     private void loadFromFile() {
@@ -52,6 +52,9 @@ public class FileTrack extends Track {
         setChannelHandle(channelHandle);
 
         setMetaData(getTrackMetaData(filePath));
+        if (getOnTrackLoadedListener() != null) {
+            getOnTrackLoadedListener().onTrackLoaded(channelHandle != 0);
+        }
     }
 
     private TrackMetaData getTrackMetaData(String path) {

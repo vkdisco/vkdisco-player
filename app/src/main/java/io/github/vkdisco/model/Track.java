@@ -37,7 +37,7 @@ public abstract class Track {
     }
 
     public interface OnTrackLoadedListener {
-        void onLoad(Track track);
+        void onTrackLoaded(boolean success);
     }
 
     public void free() {
