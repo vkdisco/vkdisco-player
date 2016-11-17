@@ -13,8 +13,8 @@ import io.github.vkdisco.player.interfaces.OnTrackSwitchListener;
  * Implements player
  */
 
-public class Player implements Track.OnTrackLoadedListener {
-    //    private Playlist playlist;
+public class Player implements Track.OnTrackDataLoadedListener {
+    private Playlist playlist;
     private Track currentTrack = null;
     private PlayerState state = PlayerState.EMPTY;
     private boolean playAfterLoad = false;
@@ -25,28 +25,28 @@ public class Player implements Track.OnTrackLoadedListener {
 
     public void play() {
         if (currentTrack == null) {
-//            if (playlist == null) {
-//                return;
-//            }
-//            switchTrack(playlist.getCurrentTrack());
-//            if (currentTrack == null) { // If getCurrentTrack() returned null then playlist is empty
-//                return;
-//            }
+            if (playlist == null) {
+                return;
+            }
+            switchTrack(playlist.getCurrentTrack());
+            if (currentTrack == null) { // If getCurrentTrack() returned null then playlist is empty
+                return;
+            }
         }
-        if (!currentTrack.isOk()) {
+        if (!currentTrack.isLoaded()) {
             playAfterLoad = true;
-            currentTrack.setOnTrackLoadedListener(this);
-            currentTrack.loadRequest();
+            currentTrack.setOnTrackDataLoadedListener(this);
+            currentTrack.load();
             return;
         }
-//        startPlaying();
+        startPlaying();
     }
 
     public void pause() {
         if (currentTrack == null) {
             return;
         }
-        if (!currentTrack.isOk()) {
+        if (!currentTrack.isLoaded()) {
             return;
         }
         BASS.BASS_ChannelPause(currentTrack.getChannelHandle());
@@ -57,7 +57,7 @@ public class Player implements Track.OnTrackLoadedListener {
         if (currentTrack == null) {
             return;
         }
-        if (!currentTrack.isOk()) {
+        if (!currentTrack.isLoaded()) {
             return;
         }
         stopPlaying();
@@ -71,7 +71,7 @@ public class Player implements Track.OnTrackLoadedListener {
         if (currentTrack == null) {
             return -1;
         }
-        if (!currentTrack.isOk()) {
+        if (!currentTrack.isLoaded()) {
             return -1;
         }
         long bytesLength = BASS.BASS_ChannelGetLength(currentTrack.getChannelHandle(), BASS.BASS_POS_BYTE);
@@ -89,7 +89,7 @@ public class Player implements Track.OnTrackLoadedListener {
         if (currentTrack == null) {
             return 0.0;
         }
-        if (!currentTrack.isOk()) {
+        if (!currentTrack.isLoaded()) {
             return 0.0;
         }
         long byteLength = BASS.BASS_ChannelGetLength(currentTrack.getChannelHandle(), BASS.BASS_POS_BYTE);
@@ -101,7 +101,7 @@ public class Player implements Track.OnTrackLoadedListener {
         if (currentTrack == null) {
             return;
         }
-        if (!currentTrack.isOk()) {
+        if (!currentTrack.isLoaded()) {
             return;
         }
         if (position > 1.0) {
@@ -128,9 +128,9 @@ public class Player implements Track.OnTrackLoadedListener {
         // TODO: 16.11.2016 Implement this
     }
 
-//    public Playlist getPlaylist() {
-//        return playlist;
-//    }
+    public Playlist getPlaylist() {
+        return playlist;
+    }
 
 //    public void setPlaylist(Playlist playlist) {
 //        freeTrack();
@@ -143,14 +143,14 @@ public class Player implements Track.OnTrackLoadedListener {
         if (currentTrack == null) {
             return false;
         }
-        return currentTrack.isOk() && currentTrack.isRemote();
+        return currentTrack.isLoaded() && currentTrack.isRemote();
     }
 
     public double getRemoteLoadedPercent() {
         if (currentTrack == null) {
             return 0.0;
         }
-        if (!currentTrack.isOk()) {
+        if (!currentTrack.isLoaded()) {
             return 0.0;
         }
         if (!currentTrack.isRemote()) {
@@ -165,7 +165,7 @@ public class Player implements Track.OnTrackLoadedListener {
         if (currentTrack == null) {
             return null;
         }
-        if (!currentTrack.isOk()) {
+        if (!currentTrack.isLoaded()) {
             return null;
         }
         return currentTrack.getMetaData();
@@ -213,7 +213,7 @@ public class Player implements Track.OnTrackLoadedListener {
         if (currentTrack == null) {
             return;
         }
-        if (!currentTrack.isOk()) {
+        if (!currentTrack.isLoaded()) {
             return;
         }
         if (state == PlayerState.PLAYING) {
@@ -227,7 +227,7 @@ public class Player implements Track.OnTrackLoadedListener {
         if (currentTrack == null) {
             return;
         }
-        if (!currentTrack.isOk()) {
+        if (!currentTrack.isLoaded()) {
             return;
         }
         if (state == PlayerState.STOPPED) {
@@ -239,7 +239,7 @@ public class Player implements Track.OnTrackLoadedListener {
     }
 
     @Override
-    public void onTrackLoaded(boolean success) {
+    public void onTrackDataLoaded(boolean success) {
         if (!success) {
             return;
         }
