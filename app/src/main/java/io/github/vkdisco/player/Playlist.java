@@ -7,7 +7,7 @@ import io.github.vkdisco.model.Track;
  * WARNING! !STUB!
  * !Will be implemented!
  */
-
+@SuppressWarnings("all")
 public class Playlist {
     public boolean hasPreviousTrack() {
         return true;
@@ -26,6 +26,10 @@ public class Playlist {
     }
 
     public Track getNextTrack() {
+        return null;
+    }
+
+    public Track playTrack(int index) {
         return null;
     }
 }

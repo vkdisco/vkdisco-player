@@ -9,5 +9,6 @@ public enum PlayerState {
     PLAYING,
     PAUSED,
     STOPPED,
-    EMPTY
+    EMPTY,
+    WAITING_TRACK_DATA
 }

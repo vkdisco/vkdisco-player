@@ -12,37 +12,37 @@ import io.github.vkdisco.player.interfaces.OnTrackSwitchListener;
  * Player
  * Implements player
  */
-
-public class Player implements Track.OnTrackDataLoadedListener {
+@SuppressWarnings("all")
+public class Player implements Track.OnTrackDataLoadedListener, OnTrackEndListener {
     private Playlist playlist;
     private Track currentTrack = null;
     private PlayerState state = PlayerState.EMPTY;
-    private boolean playAfterLoad = false;
+    private boolean playAfterDataLoad = false;
     private TrackEndNotifier trackEndNotifier = new TrackEndNotifier();
     private int trackSyncEnd = 0;
     private OnPlayerStateChangedListener stateChangedListener;
     private OnTrackSwitchListener trackSwitchListener;
 
     public void play() {
+        playAfterDataLoad = true;
         if (currentTrack == null) {
             if (playlist == null) {
                 return;
             }
             switchTrack(playlist.getCurrentTrack());
-            if (currentTrack == null) { // If getCurrentTrack() returned null then playlist is empty
-                return;
-            }
+            return;
         }
         if (!currentTrack.isLoaded()) {
-            playAfterLoad = true;
             currentTrack.setOnTrackDataLoadedListener(this);
-            currentTrack.load();
+            setState(PlayerState.WAITING_TRACK_DATA);
+            currentTrack.requestDataLoad();
             return;
         }
         startPlaying();
     }
 
     public void pause() {
+        playAfterDataLoad = true;
         if (currentTrack == null) {
             return;
         }
@@ -54,12 +54,7 @@ public class Player implements Track.OnTrackDataLoadedListener {
     }
 
     public void stop() {
-        if (currentTrack == null) {
-            return;
-        }
-        if (!currentTrack.isLoaded()) {
-            return;
-        }
+        playAfterDataLoad = false;
         stopPlaying();
     }
 
@@ -116,28 +111,39 @@ public class Player implements Track.OnTrackDataLoadedListener {
     }
 
     public boolean playTrack(int index) {
-        // TODO: 16.11.2016 Implement this
-        return false;
+        if (playlist == null) {
+            return false;
+        }
+        Track track = playlist.playTrack(index);
+        if (track == null) {
+            return false;
+        }
+        switchTrack(track);
+        return true;
     }
 
     public void nextTrack() {
-        // TODO: 16.11.2016 Implement this
+        if (playlist == null) {
+            return;
+        }
+        switchTrack(playlist.getNextTrack());
     }
 
     public void previousTrack() {
-        // TODO: 16.11.2016 Implement this
+        if (playlist == null) {
+            return;
+        }
+        switchTrack(playlist.getPreviousTrack());
     }
 
     public Playlist getPlaylist() {
         return playlist;
     }
 
-//    public void setPlaylist(Playlist playlist) {
-//        freeTrack();
-//        currentTrack = null;
-//        this.playlist = playlist;
-//        if ()
-//    }
+    public void setPlaylist(Playlist playlist) {
+        free();
+        this.playlist = playlist;
+    }
 
     public boolean isPlayingRemote() {
         if (currentTrack == null) {
@@ -179,6 +185,42 @@ public class Player implements Track.OnTrackDataLoadedListener {
         this.stateChangedListener = stateChangedListener;
     }
 
+    public void free() {
+        if (currentTrack == null) {
+            return;
+        }
+        stopPlaying();
+        if (trackSyncEnd != 0) {
+            BASS.BASS_ChannelRemoveSync(currentTrack.getChannelHandle(), trackSyncEnd);
+        }
+        currentTrack.free();
+        currentTrack = null;
+        setState(PlayerState.EMPTY);
+    }
+
+    @Override
+    public void onTrackDataLoaded(boolean success) {
+        if (!success) {
+            return;
+        }
+        if (trackSwitchListener != null) { //Track switched, info loaded
+            trackSwitchListener.onTrackSwitch();
+        }
+        if (!currentTrack.load()) {
+            return;
+        }
+        trackSyncEnd = BASS.BASS_ChannelSetSync(currentTrack.getChannelHandle(),
+                BASS.BASS_SYNC_END, 0, trackEndNotifier, null);
+        if (playAfterDataLoad) {
+            startPlaying();
+        }
+    }
+
+    @Override
+    public void onTrackEnd() {
+        nextTrack(); // TODO: 17.11.2016 Delay 20ms
+    }
+
     private void setState(PlayerState state) {
         this.state = state;
         if (stateChangedListener != null) {
@@ -192,21 +234,8 @@ public class Player implements Track.OnTrackDataLoadedListener {
             return;
         }
         currentTrack = track;
-        if (trackSwitchListener != null) {
-            trackSwitchListener.onTrackSwitch();
-        }
-    }
-
-    public void free() {
-        if (currentTrack == null) {
-            return;
-        }
-        stopPlaying();
-        if (trackSyncEnd != 0) {
-            BASS.BASS_ChannelRemoveSync(currentTrack.getChannelHandle(), trackSyncEnd);
-        }
-        currentTrack.free();
-        currentTrack = null;
+        setState(PlayerState.WAITING_TRACK_DATA);
+        currentTrack.requestDataLoad();
     }
 
     private void startPlaying() {
@@ -236,17 +265,6 @@ public class Player implements Track.OnTrackDataLoadedListener {
         BASS.BASS_ChannelStop(currentTrack.getChannelHandle());
         BASS.BASS_ChannelSetPosition(currentTrack.getChannelHandle(), 0, BASS.BASS_POS_BYTE);
         setState(PlayerState.STOPPED);
-    }
-
-    @Override
-    public void onTrackDataLoaded(boolean success) {
-        if (!success) {
-            return;
-        }
-        trackSyncEnd = BASS.BASS_ChannelSetSync(currentTrack.getChannelHandle(), BASS.BASS_SYNC_END, 0, trackEndNotifier, null);
-        if (playAfterLoad) {
-            startPlaying();
-        }
     }
 
     public static class TrackEndNotifier implements BASS.SYNCPROC {
