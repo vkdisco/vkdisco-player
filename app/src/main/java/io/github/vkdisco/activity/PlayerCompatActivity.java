@@ -11,7 +11,6 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
-import io.github.vkdisco.player.Player;
 import io.github.vkdisco.player.PlayerState;
 import io.github.vkdisco.service.PlayerService;
 
@@ -22,9 +21,12 @@ import io.github.vkdisco.service.PlayerService;
  */
 
 public class PlayerCompatActivity extends AppCompatActivity {
+    private static final int DEFAULT_UPDATE_FREQUENCY = 4; //Hz
     private ServiceConnection mPlayerServiceConnection;
     private BroadcastReceiver mPlayerBroadcastReceiver;
     private PlayerService mPlayerService;
+    private TrackPositionUpdater mPositionUpdater;
+    private Thread mPositionUpdaterThread;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -71,6 +73,10 @@ public class PlayerCompatActivity extends AppCompatActivity {
         };
         IntentFilter playerIntentFilter = new IntentFilter(PlayerService.BROADCAST_ACTION_EVENT);
         registerReceiver(mPlayerBroadcastReceiver, playerIntentFilter);
+        //Position updater
+        mPositionUpdater = new TrackPositionUpdater();
+        mPositionUpdater.setListener(this);
+        mPositionUpdater.setUpdateFrequency(DEFAULT_UPDATE_FREQUENCY);
     }
 
     @Override
@@ -82,6 +88,22 @@ public class PlayerCompatActivity extends AppCompatActivity {
         unbindService(mPlayerServiceConnection);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        startPositionUpdate();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        stopPositionUpdate();
+    }
+
+    public PlayerService getPlayerService() {
+        return mPlayerService;
+    }
+
     public void onTrackSwitched() {
     }
 
@@ -89,5 +111,77 @@ public class PlayerCompatActivity extends AppCompatActivity {
     }
 
     public void onPlaylistChanged() {
+    }
+
+    public void onTrackPositionUpdate(double position) {
+    }
+
+    private void startPositionUpdate() {
+        if (mPositionUpdaterThread != null) {
+            return;
+        }
+        mPositionUpdaterThread = new Thread(mPositionUpdater);
+        mPositionUpdater.setRunning(true);
+        mPositionUpdaterThread.start();
+    }
+
+    private void stopPositionUpdate() {
+        if (mPositionUpdaterThread == null) {
+            return;
+        }
+        mPositionUpdater.setRunning(false);
+        boolean tryAgain = true;
+        while (tryAgain) {
+            try {
+                mPositionUpdaterThread.join();
+                tryAgain = false;
+            } catch (InterruptedException ignored) {
+            }
+        }
+        mPositionUpdaterThread = null;
+    }
+
+    private void callTrackPositionUpdate() {
+        if (getPlayerService() == null) {
+            return;
+        }
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                onTrackPositionUpdate(getPlayerService().getPosition());
+            }
+        });
+    }
+
+    public static class TrackPositionUpdater implements Runnable {
+        private int mUpdateFrequency;
+        private boolean mRunning = true;
+        private PlayerCompatActivity mListener;
+
+        @Override
+        public void run() {
+            while (mRunning) {
+                if (mListener != null) {
+                    mListener.callTrackPositionUpdate();
+                }
+                try {
+                    Thread.sleep(1000 / mUpdateFrequency);
+                } catch (InterruptedException e) {
+                    break;
+                }
+            }
+        }
+
+        public void setUpdateFrequency(int updateFrequency) { //In Hz
+            this.mUpdateFrequency = updateFrequency;
+        }
+
+        public void setRunning(boolean running) {
+            this.mRunning = running;
+        }
+
+        public void setListener(PlayerCompatActivity listener) {
+            this.mListener = listener;
+        }
     }
 }
