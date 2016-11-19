@@ -16,7 +16,7 @@
             android:layout_width="200dp"
             android:layout_height="32dp"
             android:text="Alexandr Pistoletov"
-            android:textColor="@color/primary_text" />
+            android:textColor="@color/primaryText" />
 
         <TextView
             android:id="@+id/musicCompositionName"
@@ -33,7 +33,7 @@
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:text="4:04"
-        android:textColor="@color/primary_text"
+        android:textColor="@color/primaryText"
         tools:textAlignment="center" />
 
     <ImageButton

@@ -40,18 +40,18 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/musicAuthor"
+                android:id="@+id/artist"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:paddingTop="4dp"
                 android:text="Alexandr Pistoletov"
-                android:textColor="@color/primary_text"
+                android:textColor="@color/primaryText"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/musicName"
+                android:id="@+id/title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -62,9 +62,10 @@
         </LinearLayout>
 
         <ImageButton
-            android:id="@+id/playPauseButton"
+            android:id="@+id/btnPlayPause"
             android:layout_width="62dp"
             android:layout_height="62dp"
+            android:layout_marginEnd="12dp"
             android:layout_marginRight="12dp"
             app:srcCompat="@android:drawable/ic_media_pause" />
     </LinearLayout>
@@ -74,12 +75,12 @@
         android:layout_height="match_parent">
 
         <ListView
-            android:id="@+id/musicList"
+            android:id="@+id/audioList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <android.support.design.widget.FloatingActionButton
-            android:id="@+id/addMusicButton"
+            android:id="@+id/btnAdd"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
