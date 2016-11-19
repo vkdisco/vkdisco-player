@@ -7,4 +7,7 @@
     <string name="text_bass_device_init_fail">Device init fail!</string>
     <string name="text_bass_streamcreatefile_fail">Stream from file creation fail!</string>
     <string name="btn_load_url_text">Load URL</string>
+    <string name="action_settings">Settings</string>
+    <string name="search_button_text">Search</string>
+    <string name="mainmenu_button_text">Main menu</string>
 </resources>
