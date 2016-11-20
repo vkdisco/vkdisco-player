@@ -1,8 +1,6 @@
 <resources>
-    <dimen name="activity_padding">5dp</dimen>
-    <dimen name="list_item_file_padding">5dp</dimen>
-    <dimen name="list_item_file_image_margin">20dp</dimen>
-    <dimen name="list_item_file_image_size">75dp</dimen>
-    <dimen name="list_item_file_text_size">18sp</dimen>
-    <dimen name="sb_track_progress_height">20dp</dimen>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
 </resources>
