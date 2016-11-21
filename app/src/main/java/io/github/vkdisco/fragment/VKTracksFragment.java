@@ -27,7 +27,6 @@ import io.github.vkdisco.adapter.TrackAdapter;
 import io.github.vkdisco.adapter.interfaces.OnTrackClickListener;
 import io.github.vkdisco.fragment.interfaces.OnTrackSelectedListener;
 import io.github.vkdisco.model.Track;
-import io.github.vkdisco.model.TrackMetaData;
 import io.github.vkdisco.model.VKTrack;
 
 /**
@@ -87,13 +86,9 @@ public class VKTracksFragment extends Fragment {
                 VKList<VKApiAudio> list = (VKList) response.parsedModel;
 
                 for (VKApiAudio audio : list) {
-                    VKTrack vktrack = new VKTrack();
-                    TrackMetaData metaData = new TrackMetaData();
-                    metaData.setTitle(audio.title);
-                    metaData.setArtist(audio.artist);
-                    metaData.setDuration(audio.duration);
-                    vktrack.setMetaData(metaData);
-                    mData.add(vktrack);
+                    mData.add(
+                            new VKTrack(audio)
+                    );
                 }
 
                 mAdapter = new TrackAdapter(mData, new OnTrackClickListener() {

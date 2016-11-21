@@ -54,11 +54,11 @@ public abstract class Track {
         this.onTrackDataLoadedListener = onTrackDataLoadedListener;
     }
 
-    public void setMetaData(TrackMetaData metaData) {
+    protected void setMetaData(TrackMetaData metaData) {
         this.metaData = metaData;
     }
 
-    public void setChannelHandle(int channelHandle) {
+    protected void setChannelHandle(int channelHandle) {
         this.channelHandle = channelHandle;
     }
 
