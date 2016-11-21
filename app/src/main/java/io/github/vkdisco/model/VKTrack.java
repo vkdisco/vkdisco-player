@@ -21,8 +21,11 @@ public class VKTrack extends Track {
     private boolean isCached;
     private String url;
 
-    public VKTrack() {
-
+    public VKTrack(VKApiAudio vkApiAudio) {
+        super();
+        setMetaData(getTrackMetaData(vkApiAudio));
+        this.id = vkApiAudio.id;
+        this.ownerID = vkApiAudio.owner_id;
     }
 
     public VKTrack(TrackMetaData metaData, int channelHandle,
