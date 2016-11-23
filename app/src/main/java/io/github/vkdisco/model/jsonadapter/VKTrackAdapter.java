@@ -27,17 +27,17 @@ public class VKTrackAdapter extends TypeAdapter<VKTrack> {
 
     @Override
     public VKTrack read(JsonReader in) throws IOException {
-        final VKTrack vkTrack = new VKTrack();
         final TrackMetaData metaData = new TrackMetaData();
+        Integer id = null, ownerID = null;
 
         in.beginObject();
         while (in.hasNext()) {
             switch (in.nextName()) {
                 case "id":
-                    vkTrack.setId(in.nextInt());
+                    id = in.nextInt();
                     break;
                 case "owner_id":
-                    vkTrack.setOwnerID(in.nextInt());
+                    ownerID = in.nextInt();
                     break;
                 case "title":
                     metaData.setTitle(in.nextString());
@@ -52,7 +52,10 @@ public class VKTrackAdapter extends TypeAdapter<VKTrack> {
         }
         in.endObject();
 
-        vkTrack.setMetaData(metaData);
-        return vkTrack;
+        if (id != null && ownerID != null) {
+            return new VKTrack(metaData, id, ownerID);
+        } else {
+            return null;
+        }
     }
 }
