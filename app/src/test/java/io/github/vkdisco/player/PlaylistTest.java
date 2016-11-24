@@ -9,53 +9,130 @@ import java.util.List;
 import static junit.framework.Assert.*;
 
 import io.github.vkdisco.model.Track;
+import io.github.vkdisco.model.TrackMetaData;
+import io.github.vkdisco.player.interfaces.OnPlaylistChangedListener;
 
 
 /**
  * Created by tkaczenko on 19.11.16.
  */
 public class PlaylistTest {
+
+
+    private class  Listener implements OnPlaylistChangedListener{
+        public void onPlaylistChanged() {
+
+        }
+    }
+
+    private class TrackTest extends io.github.vkdisco.model.Track{
+
+        public TrackTest(TrackMetaData metadata) {
+            super(metadata);
+        }
+
+        @Override
+        public void requestDataLoad() {
+
+        }
+
+        @Override
+        public boolean load() {
+            return false;
+        }
+
+        @Override
+        public boolean isRemote() {
+            return false;
+        }
+
+        @Override
+        public boolean isCanBeCached() {
+            return false;
+        }
+    }
+
     private Playlist playlist;
+    private TrackTest track1, track2, track3;
+    private TrackMetaData trackMeta1 = new TrackMetaData("Nothing Else Matters", "Metallica", 1234),
+            trackMeta2 = new TrackMetaData("BYOB", "System of a Down", 5678),
+            trackMeta3 = new TrackMetaData("Hell", "Dusturbed", 4464);
+
+    private String serializedString  = "[\n" +
+            "  {\n" +
+            "    \"metaData\": {\n" +
+            "      \"title\": \"Nothing Else Matters\",\n" +
+            "      \"artist\": \"Metallica\",\n" +
+            "      \"duration\": 1234\n" +
+            "    },\n" +
+            "    \"channelHandle\": 0\n" +
+            "  },\n" +
+            "  {\n" +
+            "    \"metaData\": {\n" +
+            "      \"title\": \"BYOB\",\n" +
+            "      \"artist\": \"System of a Down\",\n" +
+            "      \"duration\": 5678\n" +
+            "    },\n" +
+            "    \"channelHandle\": 0\n" +
+            "  },\n" +
+            "  {\n" +
+            "    \"metaData\": {\n" +
+            "      \"title\": \"Hell\",\n" +
+            "      \"artist\": \"Dusturbed\",\n" +
+            "      \"duration\": 4464\n" +
+            "    },\n" +
+            "    \"channelHandle\": 0\n" +
+            "  }\n" +
+            "]";
+
+    private void createTracks(){
+        track1 = new TrackTest(trackMeta1);
+        track2 = new TrackTest(trackMeta2);
+        track3 = new TrackTest(trackMeta3);
+
+    }
+
     //Create Playlist object
     @Before
     public void setUp() throws Exception {
-        playlist = new Playlist(null);
+        createTracks();
+        Listener listener = new Listener();
+        playlist = new Playlist(listener);
     }
+
+
+
     //Test of iterator's place change by adding 1 track
     @Test
     public void testAddTrack() throws Exception {
 
-        playlist.addTrack(null);
-        playlist.addTrack(null);
-        assertEquals("Test passed", 1, playlist.getCurrentTrackIndex());
+        playlist.addTrack(track1);
+        playlist.addTrack(track2);
+        assertSame("Test passed", track2, playlist.getTrack(1));
 
     }
     //Test of iterator's place change by adding collection of tracks
     @Test
     public void testAddTracks() throws Exception{
         List<Track> tracks = new ArrayList<>();
-        for(int i = 0; i < 5; i++){
-            tracks.add(null);
-        }
+        tracks.add(track1);
+        tracks.add(track2);
+        tracks.add(track3);
         playlist.addTracks(tracks);
-        assertEquals("Test passed", 4, playlist.getCurrentTrackIndex());
+        assertEquals("Test passed", 2, playlist.getCurrentTrackIndex());
 
     }
-    //Test of removing 2nd track in the playlist
+    //Test of removing 1st track in the playlist
     @Test
     public void TestRemoveTrack() throws Exception {
-        Track track1 = null;
-        Track track2 = null;
         playlist.addTrack(track1);
         playlist.addTrack(track2);
-        playlist.removeTrack(1);
-        assertNotSame("Test passed", track2, playlist.getTrack(1));
+        playlist.removeTrack(0);
+        assertSame("Test passed", track2, playlist.getTrack(0));
     }
     //Test of swapping 2 tracks
     @Test
     public void testSwap() throws Exception {
-        Track track1 = null;
-        Track track2 = null;
         playlist.addTrack(track1);
         playlist.addTrack(track2);
         playlist.swap(0, 1);
@@ -64,19 +141,23 @@ public class PlaylistTest {
 
     @Test
     public void testSerialize() throws Exception {
+        playlist.addTrack(track1);
+        playlist.addTrack(track2);
+        playlist.addTrack(track3);
+        assertEquals("Test Passed", serializedString, playlist.serialize());
 
     }
 
     @Test
     public void testDeserialize() throws Exception {
 
+        assertEquals("Test passed", true, playlist.deserialize(serializedString));
+
     }
 
     //Test of situation when previous track exists
     @Test
     public void testHasPreviousTrack() throws Exception {
-        Track track1 = null;
-        Track track2 = null;
         playlist.addTrack(track1);
         playlist.addTrack(track2);
         assertEquals("Test passed", true, playlist.hasPreviousTrack());
@@ -85,36 +166,34 @@ public class PlaylistTest {
     //Test of situation when previous track doesn't exist
     @Test
     public void testNotHasPreviousTrack() throws Exception {
-        Track track1 = null;
         playlist.addTrack(track1);
+        playlist.playTrack(0);
         assertEquals("Test passed", false, playlist.hasPreviousTrack());
     }
 
     //Test of getting previous track
     @Test
     public void testGetPreviousTrack() throws Exception {
-        Track track1 = null;
-        Track track2 = null;
         playlist.addTrack(track1);
         playlist.addTrack(track2);
+        playlist.addTrack(track3);
+        playlist.playTrack(1);
         assertSame("Test passed", track1, playlist.getPreviousTrack());
     }
 
     //Test of getting current track
     @Test
     public void testGetCurrentTrack() throws Exception {
-        Track track1 = null;
-        Track track2 = null;
         playlist.addTrack(track1);
         playlist.addTrack(track2);
+        playlist.addTrack(track3);
+        playlist.playTrack(1);
         assertSame("Test passed", track2, playlist.getCurrentTrack());
     }
 
     //Test of getting current track's index
     @Test
     public void testGetCurrentTrackIndex() throws Exception {
-        Track track1 = null;
-        Track track2 = null;
         playlist.addTrack(track1);
         playlist.addTrack(track2);
         assertEquals("Test passed", 1, playlist.getCurrentTrackIndex());
@@ -123,8 +202,6 @@ public class PlaylistTest {
     //Test of situation when next track exists
     @Test
     public void testHasNextTrack() throws Exception {
-        Track track1 = null;
-        Track track2 = null;
         playlist.addTrack(track1);
         playlist.addTrack(track2);
         playlist.playTrack(0);
@@ -134,18 +211,15 @@ public class PlaylistTest {
     //Test of situation when next track doesn't exist
     @Test
     public void testNotHasNextTrack() throws Exception {
-        Track track1 = null;
-        Track track2 = null;
         playlist.addTrack(track1);
         playlist.addTrack(track2);
+        playlist.playTrack(1);
         assertEquals("Test passed", false, playlist.hasNextTrack());
     }
 
     //Test of getting next track
     @Test
     public void testGetNextTrack() throws Exception {
-        Track track1 = null;
-        Track track2 = null;
         playlist.addTrack(track1);
         playlist.addTrack(track2);
         playlist.playTrack(0);
@@ -155,9 +229,6 @@ public class PlaylistTest {
     //Test of getting track by index
     @Test
     public void testGetTrack() throws Exception {
-        Track track1 = null;
-        Track track2 = null;
-        Track track3 = null;
         playlist.addTrack(track1);
         playlist.addTrack(track2);
         playlist.addTrack(track3);
@@ -167,13 +238,10 @@ public class PlaylistTest {
     //Test of moving index to the track that need to be played
     @Test
     public void testPlayTrack() throws Exception {
-        Track track1 = null;
-        Track track2 = null;
         playlist.addTrack(track1);
         playlist.addTrack(track2);
-        playlist.playTrack(0);
+        playlist.playTrack(1);
         assertEquals("Test passed", 0, playlist.getCurrentTrackIndex());
-
     }
 
 }
