@@ -10,6 +10,7 @@ import static junit.framework.Assert.*;
 
 import io.github.vkdisco.model.Track;
 import io.github.vkdisco.model.TrackMetaData;
+import io.github.vkdisco.model.VKTrack;
 import io.github.vkdisco.player.interfaces.OnPlaylistChangedListener;
 
 
@@ -25,70 +26,41 @@ public class PlaylistTest {
         }
     }
 
-    private class TrackTest extends io.github.vkdisco.model.Track{
-
-        public TrackTest(TrackMetaData metadata) {
-            super(metadata);
-        }
-
-        @Override
-        public void requestDataLoad() {
-
-        }
-
-        @Override
-        public boolean load() {
-            return false;
-        }
-
-        @Override
-        public boolean isRemote() {
-            return false;
-        }
-
-        @Override
-        public boolean isCanBeCached() {
-            return false;
-        }
-    }
 
     private Playlist playlist;
-    private TrackTest track1, track2, track3;
+    private VKTrack track1, track2, track3;
     private TrackMetaData trackMeta1 = new TrackMetaData("Nothing Else Matters", "Metallica", 1234),
             trackMeta2 = new TrackMetaData("BYOB", "System of a Down", 5678),
             trackMeta3 = new TrackMetaData("Hell", "Dusturbed", 4464);
 
     private String serializedString  = "[\n" +
             "  {\n" +
-            "    \"metaData\": {\n" +
-            "      \"title\": \"Nothing Else Matters\",\n" +
-            "      \"artist\": \"Metallica\",\n" +
-            "      \"duration\": 1234\n" +
-            "    },\n" +
-            "    \"channelHandle\": 0\n" +
+            "    \"id\": 1,\n" +
+            "    \"owner_id\": 111,\n" +
+            "    \"title\": \"Nothing Else Matters\",\n" +
+            "    \"artist\": \"Metallica\",\n" +
+            "    \"duration\": 1234\n" +
             "  },\n" +
             "  {\n" +
-            "    \"metaData\": {\n" +
-            "      \"title\": \"BYOB\",\n" +
-            "      \"artist\": \"System of a Down\",\n" +
-            "      \"duration\": 5678\n" +
-            "    },\n" +
-            "    \"channelHandle\": 0\n" +
+            "    \"id\": 2,\n" +
+            "    \"owner_id\": 222,\n" +
+            "    \"title\": \"BYOB\",\n" +
+            "    \"artist\": \"System of a Down\",\n" +
+            "    \"duration\": 5678\n" +
             "  },\n" +
             "  {\n" +
-            "    \"metaData\": {\n" +
-            "      \"title\": \"Hell\",\n" +
-            "      \"artist\": \"Dusturbed\",\n" +
-            "      \"duration\": 4464\n" +
-            "    },\n" +
-            "    \"channelHandle\": 0\n" +
+            "    \"id\": 3,\n" +
+            "    \"owner_id\": 333,\n" +
+            "    \"title\": \"Hell\",\n" +
+            "    \"artist\": \"Dusturbed\",\n" +
+            "    \"duration\": 4464\n" +
             "  }\n" +
             "]";
 
     private void createTracks(){
-        track1 = new TrackTest(trackMeta1);
-        track2 = new TrackTest(trackMeta2);
-        track3 = new TrackTest(trackMeta3);
+        track1 = new VKTrack(trackMeta1, 1, 111);
+        track2 = new VKTrack(trackMeta2, 2, 222);
+        track3 = new VKTrack(trackMeta3, 3, 333);
 
     }
 
@@ -240,7 +212,7 @@ public class PlaylistTest {
     public void testPlayTrack() throws Exception {
         playlist.addTrack(track1);
         playlist.addTrack(track2);
-        playlist.playTrack(1);
+        playlist.playTrack(0);
         assertEquals("Test passed", 0, playlist.getCurrentTrackIndex());
     }
 
