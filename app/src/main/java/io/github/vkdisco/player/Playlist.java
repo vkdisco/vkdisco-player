@@ -30,6 +30,7 @@ Several methods will return boolean as successful flag, but now its don't do it
  * @see ListIterator
  */
 //// TODO: 19.11.16 Test this class
+//// TODO: 28.11.16 Fix deserialize bug
 public class Playlist {
     private static final GsonBuilder gsonBuilder;
 
@@ -169,6 +170,6 @@ public class Playlist {
 
     public Track playTrack(int index) {
         iterator = tracks.listIterator(index);
-        return tracks.get(index);
+        return iterator.next();
     }
 }

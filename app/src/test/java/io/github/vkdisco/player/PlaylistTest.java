@@ -6,12 +6,13 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static junit.framework.Assert.*;
-
 import io.github.vkdisco.model.Track;
 import io.github.vkdisco.model.TrackMetaData;
 import io.github.vkdisco.model.VKTrack;
 import io.github.vkdisco.player.interfaces.OnPlaylistChangedListener;
+
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertSame;
 
 
 /**
@@ -20,7 +21,7 @@ import io.github.vkdisco.player.interfaces.OnPlaylistChangedListener;
 public class PlaylistTest {
 
 
-    private class  Listener implements OnPlaylistChangedListener{
+    private class Listener implements OnPlaylistChangedListener {
         public void onPlaylistChanged() {
 
         }
@@ -33,7 +34,7 @@ public class PlaylistTest {
             trackMeta2 = new TrackMetaData("BYOB", "System of a Down", 5678),
             trackMeta3 = new TrackMetaData("Hell", "Dusturbed", 4464);
 
-    private String serializedString  = "[\n" +
+    private String serializedString = "[\n" +
             "  {\n" +
             "    \"id\": 1,\n" +
             "    \"owner_id\": 111,\n" +
@@ -57,7 +58,7 @@ public class PlaylistTest {
             "  }\n" +
             "]";
 
-    private void createTracks(){
+    private void createTracks() {
         track1 = new VKTrack(trackMeta1, 1, 111);
         track2 = new VKTrack(trackMeta2, 2, 222);
         track3 = new VKTrack(trackMeta3, 3, 333);
@@ -73,7 +74,6 @@ public class PlaylistTest {
     }
 
 
-
     //Test of iterator's place change by adding 1 track
     @Test
     public void testAddTrack() throws Exception {
@@ -83,9 +83,10 @@ public class PlaylistTest {
         assertSame("Test passed", track2, playlist.getTrack(1));
 
     }
+
     //Test of iterator's place change by adding collection of tracks
     @Test
-    public void testAddTracks() throws Exception{
+    public void testAddTracks() throws Exception {
         List<Track> tracks = new ArrayList<>();
         tracks.add(track1);
         tracks.add(track2);
@@ -94,6 +95,7 @@ public class PlaylistTest {
         assertEquals("Test passed", 2, playlist.getCurrentTrackIndex());
 
     }
+
     //Test of removing 1st track in the playlist
     @Test
     public void TestRemoveTrack() throws Exception {
@@ -102,6 +104,7 @@ public class PlaylistTest {
         playlist.removeTrack(0);
         assertSame("Test passed", track2, playlist.getTrack(0));
     }
+
     //Test of swapping 2 tracks
     @Test
     public void testSwap() throws Exception {
@@ -139,7 +142,7 @@ public class PlaylistTest {
     @Test
     public void testNotHasPreviousTrack() throws Exception {
         playlist.addTrack(track1);
-        playlist.playTrack(0);
+        playlist.addTrack(track2);
         assertEquals("Test passed", false, playlist.hasPreviousTrack());
     }
 
@@ -150,7 +153,7 @@ public class PlaylistTest {
         playlist.addTrack(track2);
         playlist.addTrack(track3);
         playlist.playTrack(1);
-        assertSame("Test passed", track1, playlist.getPreviousTrack());
+        assertSame("Test passed", track2, playlist.getPreviousTrack());
     }
 
     //Test of getting current track
@@ -207,6 +210,7 @@ public class PlaylistTest {
         assertSame("Test passed", track2, playlist.getTrack(1));
 
     }
+
     //Test of moving index to the track that need to be played
     @Test
     public void testPlayTrack() throws Exception {
