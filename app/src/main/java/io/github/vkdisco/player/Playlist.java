@@ -1,6 +1,5 @@
 package io.github.vkdisco.player;
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
@@ -12,11 +11,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
-import io.github.vkdisco.model.FileTrack;
 import io.github.vkdisco.model.Track;
-import io.github.vkdisco.model.VKTrack;
-import io.github.vkdisco.model.jsonadapter.FileTrackAdapter;
-import io.github.vkdisco.model.jsonadapter.VKTrackAdapter;
+import io.github.vkdisco.model.jsonadapter.TrackAdapter;
 import io.github.vkdisco.player.interfaces.OnPlaylistChangedListener;
 
 /*
@@ -30,14 +26,14 @@ Several methods will return boolean as successful flag, but now its don't do it
  * @see ListIterator
  */
 //// TODO: 19.11.16 Test this class
-//// TODO: 28.11.16 Fix deserialize bug
 public class Playlist {
     private static final GsonBuilder gsonBuilder;
+    private static final Type type = new TypeToken<List<Track>>() {
+    }.getType();
 
     static {
         gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(FileTrack.class, new FileTrackAdapter());
-        gsonBuilder.registerTypeAdapter(VKTrack.class, new VKTrackAdapter());
+        gsonBuilder.registerTypeAdapter(Track.class, new TrackAdapter());
         gsonBuilder.setPrettyPrinting();
     }
 
@@ -106,16 +102,12 @@ public class Playlist {
      * @return serialized string
      */
     public String serialize() {
-        Gson gson = gsonBuilder.create();
-        return gson.toJson(tracks);
+        return gsonBuilder.create().toJson(tracks, type);
     }
 
     public boolean deserialize(String serialized) {
-        Gson gson = gsonBuilder.create();
-        Type type = new TypeToken<List<Track>>() {
-        }.getType();
-        this.tracks = gson.fromJson(serialized, type);
-        return tracks != null;
+        this.tracks = gsonBuilder.create().fromJson(serialized, type);
+        return !tracks.isEmpty();
     }
 
     public boolean hasPreviousTrack() {

@@ -36,6 +36,7 @@ public class PlaylistTest {
 
     private String serializedString = "[\n" +
             "  {\n" +
+            "    \"type\": \"VKTrack\",\n" +
             "    \"id\": 1,\n" +
             "    \"owner_id\": 111,\n" +
             "    \"title\": \"Nothing Else Matters\",\n" +
@@ -43,6 +44,7 @@ public class PlaylistTest {
             "    \"duration\": 1234\n" +
             "  },\n" +
             "  {\n" +
+            "    \"type\": \"VKTrack\",\n" +
             "    \"id\": 2,\n" +
             "    \"owner_id\": 222,\n" +
             "    \"title\": \"BYOB\",\n" +
@@ -50,6 +52,7 @@ public class PlaylistTest {
             "    \"duration\": 5678\n" +
             "  },\n" +
             "  {\n" +
+            "    \"type\": \"VKTrack\",\n" +
             "    \"id\": 3,\n" +
             "    \"owner_id\": 333,\n" +
             "    \"title\": \"Hell\",\n" +
@@ -119,15 +122,13 @@ public class PlaylistTest {
         playlist.addTrack(track1);
         playlist.addTrack(track2);
         playlist.addTrack(track3);
+        System.out.println(playlist.serialize());
         assertEquals("Test Passed", serializedString, playlist.serialize());
-
     }
 
     @Test
     public void testDeserialize() throws Exception {
-
         assertEquals("Test passed", true, playlist.deserialize(serializedString));
-
     }
 
     //Test of situation when previous track exists
