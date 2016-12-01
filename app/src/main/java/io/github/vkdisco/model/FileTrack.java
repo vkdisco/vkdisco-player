@@ -15,10 +15,6 @@ import java.io.File;
 public class FileTrack extends Track {
     private File file;
 
-    public FileTrack() {
-
-    }
-
     public FileTrack(TrackMetaData metaData, int channelHandle,
                      OnTrackDataLoadedListener onTrackLoadedListener, File file) {
         super(metaData, channelHandle, onTrackLoadedListener);
@@ -31,7 +27,7 @@ public class FileTrack extends Track {
         this.file = new File(path);
     }
 
-    private FileTrack(TrackMetaData metaData, String path) {
+    public FileTrack(TrackMetaData metaData, String path) {
         super(metaData);
         this.file = new File(path);
     }

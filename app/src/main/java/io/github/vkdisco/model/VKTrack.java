@@ -35,7 +35,7 @@ public class VKTrack extends Track {
         this.ownerID = ownerID;
     }
 
-    private VKTrack(TrackMetaData metaData, int id, int ownerID) {
+    public VKTrack(TrackMetaData metaData, int id, int ownerID) {
         super(metaData);
         this.id = id;
         this.ownerID = ownerID;

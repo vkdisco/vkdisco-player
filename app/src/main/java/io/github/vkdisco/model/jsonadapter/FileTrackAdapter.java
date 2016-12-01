@@ -4,7 +4,6 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
-import java.io.File;
 import java.io.IOException;
 
 import io.github.vkdisco.model.FileTrack;
@@ -32,14 +31,14 @@ public class FileTrackAdapter extends TypeAdapter<FileTrack> {
 
     @Override
     public FileTrack read(JsonReader in) throws IOException {
-        final FileTrack fileTrack = new FileTrack();
         final TrackMetaData metaData = new TrackMetaData();
+        String path = null;
 
         in.beginObject();
         while (in.hasNext()) {
             switch (in.nextName()) {
                 case "path":
-                    fileTrack.setFile(new File(in.nextString()));
+                    path = in.nextString();
                     break;
                 case "title":
                     metaData.setTitle(in.nextString());
@@ -60,7 +59,10 @@ public class FileTrackAdapter extends TypeAdapter<FileTrack> {
         }
         in.endObject();
 
-        fileTrack.setMetaData(metaData);
-        return null;
+        if (path != null) {
+            return new FileTrack(metaData, path);
+        } else {
+            return null;
+        }
     }
 }
