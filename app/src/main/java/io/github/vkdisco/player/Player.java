@@ -13,11 +13,10 @@ import io.github.vkdisco.player.interfaces.OnTrackSwitchListener;
  * Implements player
  */
 @SuppressWarnings("all")
-public class Player implements Track.OnTrackDataLoadedListener, OnTrackEndListener {
+public class Player implements OnTrackEndListener {
     private Playlist playlist;
     private Track currentTrack = null;
     private PlayerState state = PlayerState.EMPTY;
-    private boolean playAfterDataLoad = false;
     private TrackEndNotifier trackEndNotifier = new TrackEndNotifier();
     private int trackSyncEnd = 0;
     private OnPlayerStateChangedListener stateChangedListener;
@@ -28,25 +27,13 @@ public class Player implements Track.OnTrackDataLoadedListener, OnTrackEndListen
     }
 
     public void play() {
-        playAfterDataLoad = true;
-        if (currentTrack == null) {
-            if (playlist == null) {
-                return;
-            }
+        if ((currentTrack == null) && (playlist != null)) {
             switchTrack(playlist.getCurrentTrack());
-            return;
-        }
-        if (!currentTrack.isLoaded()) {
-            currentTrack.setOnTrackDataLoadedListener(this);
-            setState(PlayerState.WAITING_TRACK_DATA);
-            currentTrack.requestDataLoad();
-            return;
         }
         startPlaying();
     }
 
     public void pause() {
-        playAfterDataLoad = true;
         if (currentTrack == null) {
             return;
         }
@@ -58,7 +45,6 @@ public class Player implements Track.OnTrackDataLoadedListener, OnTrackEndListen
     }
 
     public void stop() {
-        playAfterDataLoad = false;
         stopPlaying();
     }
 
@@ -130,11 +116,17 @@ public class Player implements Track.OnTrackDataLoadedListener, OnTrackEndListen
         if (playlist == null) {
             return;
         }
+        if (!playlist.hasNextTrack()) {
+            return;
+        }
         switchTrack(playlist.getNextTrack());
     }
 
     public void previousTrack() {
         if (playlist == null) {
+            return;
+        }
+        if (!playlist.hasPreviousTrack()) {
             return;
         }
         switchTrack(playlist.getPreviousTrack());
@@ -203,24 +195,6 @@ public class Player implements Track.OnTrackDataLoadedListener, OnTrackEndListen
     }
 
     @Override
-    public void onTrackDataLoaded(boolean success) {
-        if (!success) {
-            return;
-        }
-        if (trackSwitchListener != null) { //Track switched, info loaded
-            trackSwitchListener.onTrackSwitch();
-        }
-        if (!currentTrack.load()) {
-            return;
-        }
-        trackSyncEnd = BASS.BASS_ChannelSetSync(currentTrack.getChannelHandle(),
-                BASS.BASS_SYNC_END, 0, trackEndNotifier, null);
-        if (playAfterDataLoad) {
-            startPlaying();
-        }
-    }
-
-    @Override
     public void onTrackEnd() {
         nextTrack(); // TODO: 17.11.2016 Delay 20ms
     }
@@ -238,32 +212,38 @@ public class Player implements Track.OnTrackDataLoadedListener, OnTrackEndListen
             return;
         }
         currentTrack = track;
-        setState(PlayerState.WAITING_TRACK_DATA);
-        currentTrack.requestDataLoad();
     }
 
-    private void startPlaying() {
-        if (currentTrack == null) {
-            return;
-        }
-        if (!currentTrack.isLoaded()) {
-            return;
-        }
+    private boolean startPlaying() {
         if (state == PlayerState.PLAYING) {
-            return;
+            return false;
         }
-        BASS.BASS_ChannelPlay(currentTrack.getChannelHandle(), false);
+        if (currentTrack == null) {
+            return false;
+        }
+        if (!currentTrack.isDataLoaded()) {
+            return false;
+        }
+        if (!currentTrack.load()) {
+            return false;
+        }
+        trackSyncEnd = BASS.BASS_ChannelSetSync(currentTrack.getChannelHandle(),
+                BASS.BASS_SYNC_END, 0, trackEndNotifier, null);
+        if (!BASS.BASS_ChannelPlay(currentTrack.getChannelHandle(), false)) {
+            return false;
+        }
         setState(PlayerState.PLAYING);
+        return true;
     }
 
     private void stopPlaying() {
+        if (state == PlayerState.STOPPED) {
+            return;
+        }
         if (currentTrack == null) {
             return;
         }
         if (!currentTrack.isLoaded()) {
-            return;
-        }
-        if (state == PlayerState.STOPPED) {
             return;
         }
         BASS.BASS_ChannelStop(currentTrack.getChannelHandle());

@@ -1,5 +1,7 @@
 package io.github.vkdisco.player;
 
+import android.os.Parcelable;
+
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
@@ -13,7 +15,7 @@ import io.github.vkdisco.model.Track;
 import io.github.vkdisco.model.jsonadapter.TrackAdapter;
 import io.github.vkdisco.player.interfaces.OnPlaylistChangedListener;
 
-public class Playlist {
+public class Playlist implements Track.OnTrackDataLoadedListener {
     private static final GsonBuilder gsonBuilder;
     private static final Type type = new TypeToken<List<Track>>() {
     }.getType();
@@ -34,15 +36,22 @@ public class Playlist {
 
     public void addTrack(Track track) {
         tracks.add(track);
-        listener.onPlaylistChanged();
+        track.setOnTrackDataLoadedListener(this);
+        track.requestDataLoad();
+        if (listener != null) {
+            listener.onPlaylistChanged();
+        }
     }
 
     public void addTracks(Collection<Track> tracks) {
-        for (Track track :
-                tracks) {
+        for (Track track : tracks) {
             this.tracks.add(track);
+            track.setOnTrackDataLoadedListener(this);
+            track.requestDataLoad();
         }
-        listener.onPlaylistChanged();
+        if (listener != null) {
+            listener.onPlaylistChanged();
+        }
     }
 
     public Track removeTrack(int index) {
@@ -50,6 +59,9 @@ public class Playlist {
             this.index--;
         }
         Track previous = tracks.remove(index);
+        if (listener != null) {
+            listener.onPlaylistChanged();
+        }
         return previous;
     }
 
@@ -59,6 +71,9 @@ public class Playlist {
             return false;
         }
         Collections.swap(tracks, indexA, indexB);
+        if (listener != null) {
+            listener.onPlaylistChanged();
+        }
         return true;
     }
 
@@ -108,5 +123,12 @@ public class Playlist {
     public Track playTrack(int index) {
         this.index = index;
         return tracks.get(index);
+    }
+
+    @Override
+    public void onTrackDataLoaded(boolean success) {
+        if (listener != null) {
+            listener.onPlaylistChanged();
+        }
     }
 }
