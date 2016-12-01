@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -44,6 +45,9 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
 
         // Playlist's recycler view
         mRVPlaylist = ((RecyclerView) findViewById(R.id.rvPlaylist));
+        if (mRVPlaylist != null) {
+            mRVPlaylist.setLayoutManager(new LinearLayoutManager(this));
+        }
     }
 
     @Override

@@ -48,6 +48,7 @@ public class PlayerService extends Service implements OnTrackSwitchListener,
         player = new Player();
         playlist = new Playlist(this); // STUB!
         // TODO: 17.11.2016 Load default playlist (w loadPlaylist())
+        player.setPlaylist(playlist);
     }
 
     @Override
@@ -136,18 +137,27 @@ public class PlayerService extends Service implements OnTrackSwitchListener,
     //Callbacks
     @Override
     public void onPlayerStateChanged(PlayerState state) {
-        // TODO: 01.12.2016 Send broadcast message EVENT_STATE_CHANGED
+        Log.d(TAG, "onPlayerStateChanged: i'm called :O");
+        sendEventBroadcast(EVENT_STATE_CHANGED);
     }
 
     @Override
     public void onPlaylistChanged() {
         Log.d(TAG, "onPlaylistChanged: i'm called;)");
-        // TODO: 01.12.2016 Send broadcast message EVENT_PLAYLIST_CHANGED
+        sendEventBroadcast(EVENT_PLAYLIST_CHANGED);
     }
 
     @Override
     public void onTrackSwitch() {
-        // TODO: 01.12.2016 Send broadcast message EVENT_TRACK_SWITCHED
+        Log.d(TAG, "onTrackSwitch: i'm called :P");
+        sendEventBroadcast(EVENT_TRACK_SWITCHED);
+    }
+
+    private void sendEventBroadcast(String event) {
+        Intent broadcastIntent = new Intent();
+        broadcastIntent.setAction(BROADCAST_ACTION_EVENT);
+        broadcastIntent.putExtra(EXTRA_EVENT, event);
+        sendBroadcast(broadcastIntent);
     }
 
     public class PlayerBinder extends Binder {
