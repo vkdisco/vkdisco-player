@@ -38,12 +38,14 @@ public class Playlist {
     }
 
     private List<Track> tracks = new ArrayList<>();
-    private ListIterator<Track> iterator;
+    private int index = 0;
     private OnPlaylistChangedListener listener;
+
+    @Deprecated
+    private ListIterator<Track> iterator = tracks.listIterator();
 
     public Playlist(OnPlaylistChangedListener listener) {
         this.listener = listener;
-        iterator = tracks.listIterator();
     }
 
     /**
@@ -55,7 +57,7 @@ public class Playlist {
      * @throws IllegalArgumentException      - if some aspect of this element prevents it from being added to this list
      */
     public void addTrack(Track track) {
-        iterator.add(track);
+        tracks.add(track);
         listener.onPlaylistChanged();
     }
 
@@ -70,7 +72,7 @@ public class Playlist {
     public void addTracks(Collection<Track> tracks) {
         for (Track track :
                 tracks) {
-            iterator.add(track);
+            this.tracks.add(track);
         }
         listener.onPlaylistChanged();
     }
@@ -84,6 +86,9 @@ public class Playlist {
      * @throws IllegalStateException         - if neither next nor previous have been called, or remove or add have been called after the last call to next or previous
      */
     public Track removeTrack(int index) {
+        if (index < this.index) {
+            this.index--;
+        }
         return tracks.remove(index);
     }
 
@@ -111,7 +116,8 @@ public class Playlist {
     }
 
     public boolean hasPreviousTrack() {
-        return iterator.hasPrevious();
+        int temp = index - 1;
+        return !(temp < 0 && temp > tracks.size());
     }
 
     /**
@@ -121,7 +127,8 @@ public class Playlist {
      * @throws NoSuchElementException - if the iteration has no previous element
      */
     public Track getPreviousTrack() {
-        return iterator.previous();
+        int temp = index - 1;
+        return tracks.get(temp);
     }
 
     /**
@@ -130,7 +137,7 @@ public class Playlist {
      * @return
      */
     public Track getCurrentTrack() {
-        return tracks.get(iterator.nextIndex() - 1);
+        return tracks.get(index);
     }
 
     /**
@@ -139,7 +146,7 @@ public class Playlist {
      * @return
      */
     public int getCurrentTrackIndex() {
-        return iterator.nextIndex() - 1;
+        return index;
     }
 
     public boolean hasNextTrack() {
@@ -161,7 +168,7 @@ public class Playlist {
     }
 
     public Track playTrack(int index) {
-        iterator = tracks.listIterator(index);
-        return iterator.next();
+        this.index = index;
+        return tracks.get(index);
     }
 }

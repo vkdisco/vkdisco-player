@@ -108,6 +108,17 @@ public class PlaylistTest {
         assertSame("Test passed", track2, playlist.getTrack(0));
     }
 
+
+    @Test
+    public void testRemoveTrackIndex() throws Exception {
+        playlist.addTrack(track1);
+        playlist.addTrack(track2);
+        playlist.addTrack(track3);
+        playlist.playTrack(1);
+        playlist.removeTrack(0);
+        assertEquals(track2, playlist.getCurrentTrack());
+    }
+
     //Test of swapping 2 tracks
     @Test
     public void testSwap() throws Exception {
