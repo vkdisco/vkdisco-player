@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal" >
 
-    <!--<ImageView
+    <ImageView
         android:id="@+id/ivFileIcon"
         android:layout_width="@dimen/list_item_file_image_size"
         android:layout_height="@dimen/list_item_file_image_size"
@@ -20,5 +20,5 @@
         android:layout_gravity="center_vertical"
         android:text="Sample"
         android:textColor="@color/primaryText"
-        android:textSize="@dimen/list_item_file_text_size" />-->
+        android:textSize="@dimen/list_item_file_text_size" />
 </LinearLayout>

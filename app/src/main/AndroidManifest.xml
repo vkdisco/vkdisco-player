@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <service android:name=".service.PlayerService" />
-        <activity android:name=".SampleActivity"
+        <activity android:name=".activity.PlaylistActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

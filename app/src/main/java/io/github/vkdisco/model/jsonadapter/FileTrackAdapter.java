@@ -19,7 +19,7 @@ public class FileTrackAdapter extends TypeAdapter<FileTrack> {
     public void write(JsonWriter out, FileTrack value) throws IOException {
         out.beginObject();
         final TrackMetaData metaData = value.getMetaData();
-        out.name("path").value(value.getFile().getAbsolutePath());
+        out.name("path").value(value.getPath());
         out.name("title").value(metaData.getTitle());
         out.name("artist").value(metaData.getArtist());
         out.name("year").value(metaData.getYear());
@@ -60,7 +60,7 @@ public class FileTrackAdapter extends TypeAdapter<FileTrack> {
         in.endObject();
 
         if (path != null) {
-            return new FileTrack(metaData, path);
+            return new FileTrack(path);
         } else {
             return null;
         }

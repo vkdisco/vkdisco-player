@@ -27,6 +27,11 @@ public class VKTrack extends Track {
         this.ownerID = vkApiAudio.owner_id;
     }
 
+    public VKTrack(TrackMetaData metaData, int id, int ownerId) {
+        setMetaData(metaData);
+        this.id = id;
+        this.ownerID = ownerId;
+    }
 
     @Override
     public void requestDataLoad() {
