@@ -9,22 +9,8 @@ import com.un4seen.bass.BASS;
 public abstract class Track {
     private TrackMetaData metaData;
     private int channelHandle = 0;
+    private boolean isDataLoaded = false;
     private OnTrackDataLoadedListener onTrackDataLoadedListener;
-
-    public Track() {
-
-    }
-
-    public Track(TrackMetaData metaData) {
-        this.metaData = metaData;
-    }
-
-    public Track(TrackMetaData metaData, int channelHandle,
-                 OnTrackDataLoadedListener onTrackDataLoadedListener) {
-        this.metaData = metaData;
-        this.channelHandle = channelHandle;
-        this.onTrackDataLoadedListener = onTrackDataLoadedListener;
-    }
 
     abstract public void requestDataLoad();
 
@@ -52,6 +38,14 @@ public abstract class Track {
 
     public void setOnTrackDataLoadedListener(OnTrackDataLoadedListener onTrackDataLoadedListener) {
         this.onTrackDataLoadedListener = onTrackDataLoadedListener;
+    }
+
+    public boolean isDataLoaded() {
+        return isDataLoaded;
+    }
+
+    protected void setDataLoaded(boolean dataLoaded) {
+        isDataLoaded = dataLoaded;
     }
 
     protected void setMetaData(TrackMetaData metaData) {

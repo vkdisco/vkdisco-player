@@ -3,6 +3,7 @@ package io.github.vkdisco.model;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
+import android.util.Log;
 
 import com.un4seen.bass.BASS;
 
@@ -13,29 +14,17 @@ import java.io.File;
  */
 
 public class FileTrack extends Track {
-    private File file;
+    private static final String LOG_TAG = "FileTrack";
+    private final String path;
 
-    public FileTrack(TrackMetaData metaData, int channelHandle,
-                     OnTrackDataLoadedListener onTrackLoadedListener, File file) {
-        super(metaData, channelHandle, onTrackLoadedListener);
-        this.file = file;
-    }
-
-    public FileTrack(TrackMetaData metaData, int channelHandle,
-                     OnTrackDataLoadedListener onTrackLoadedListener, String path) {
-        super(metaData, channelHandle, onTrackLoadedListener);
-        this.file = new File(path);
-    }
-
-    public FileTrack(TrackMetaData metaData, String path) {
-        super(metaData);
-        this.file = new File(path);
+    public FileTrack(String path) {
+        this.path = path;
     }
 
     @Override
     public void requestDataLoad() {
-        String filePath = file.getAbsolutePath();
-        setMetaData(getTrackMetaData(filePath));
+        setMetaData(getTrackMetaData(path));
+        setDataLoaded(true);
         if (getOnTrackDataLoadedListener() != null) {
             getOnTrackDataLoadedListener().onTrackDataLoaded(true);
         }
@@ -47,19 +36,27 @@ public class FileTrack extends Track {
     }
 
     private boolean loadFromFile() {
-        if (file == null) {
+        if (path == null) {
             return false;
         }
 
-        String filePath = file.getAbsolutePath();
-        int channelHandle = BASS.BASS_StreamCreateFile(filePath, 0, 0, 0);
+        int channelHandle = BASS.BASS_StreamCreateFile(path, 0, 0, 0);
         setChannelHandle(channelHandle);
         return channelHandle != 0;
     }
 
     private TrackMetaData getTrackMetaData(String path) {
         MediaMetadataRetriever metadataRetriever = new MediaMetadataRetriever();
-        metadataRetriever.setDataSource(path);
+        if (path == null) {
+            return null;
+        }
+        try {
+            metadataRetriever.setDataSource(path);
+        } catch (IllegalArgumentException e) {
+            Log.d(LOG_TAG, "getTrackMetaData: setDataSource() throws IllegalArgumentException!");
+            return null;
+        }
+
         TrackMetaData metaData = new TrackMetaData();
         metaData.setTitle(
                 metadataRetriever.extractMetadata(
@@ -109,11 +106,7 @@ public class FileTrack extends Track {
         return false;
     }
 
-    public File getFile() {
-        return file;
-    }
-
-    public void setFile(File file) {
-        this.file = file;
+    public String getPath() {
+        return path;
     }
 }
