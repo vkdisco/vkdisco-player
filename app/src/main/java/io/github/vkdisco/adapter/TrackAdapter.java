@@ -49,9 +49,9 @@ public class TrackAdapter extends
 
         TrackViewHolder(View itemView) {
             super(itemView);
-            artist = (TextView) itemView.findViewById(R.id.musicAuthorName);
-            title = (TextView) itemView.findViewById(R.id.musicCompositionName);
-            duration = (TextView) itemView.findViewById(R.id.musicDuration);
+            artist = (TextView) itemView.findViewById(R.id.tvArtist);
+            title = (TextView) itemView.findViewById(R.id.tvTitle);
+            duration = (TextView) itemView.findViewById(R.id.tvDuration);
         }
 
         void bind(final Track track, final OnTrackClickListener listener) {

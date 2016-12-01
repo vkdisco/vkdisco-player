@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.un4seen.bass.BASS;
 
@@ -24,6 +25,8 @@ import io.github.vkdisco.player.interfaces.OnTrackSwitchListener;
 
 public class PlayerService extends Service implements OnTrackSwitchListener,
         OnPlayerStateChangedListener, OnPlaylistChangedListener {
+    private static final String TAG = "PlayerService";
+
     public static final String EXTRA_WAKEUP = "io.github.vkdisco.PlayerService.EXTRA.WAKEUP";
     public static final String EXTRA_EVENT = "io.github.vkdisco.PlayerService.EXTRA.EVENT";
     public static final String EXTRA_STATE = "io.github.vkdisco.PlayerService.EXTRA.STATE";
@@ -43,6 +46,7 @@ public class PlayerService extends Service implements OnTrackSwitchListener,
         super.onCreate();
         BASS.BASS_Init(-1, 44100, 0);
         player = new Player();
+        playlist = new Playlist(this); // STUB!
         // TODO: 17.11.2016 Load default playlist (w loadPlaylist())
     }
 
@@ -132,17 +136,18 @@ public class PlayerService extends Service implements OnTrackSwitchListener,
     //Callbacks
     @Override
     public void onPlayerStateChanged(PlayerState state) {
-        //...
+        // TODO: 01.12.2016 Send broadcast message EVENT_STATE_CHANGED
     }
 
     @Override
     public void onPlaylistChanged() {
-        //...
+        Log.d(TAG, "onPlaylistChanged: i'm called;)");
+        // TODO: 01.12.2016 Send broadcast message EVENT_PLAYLIST_CHANGED
     }
 
     @Override
     public void onTrackSwitch() {
-        //...
+        // TODO: 01.12.2016 Send broadcast message EVENT_TRACK_SWITCHED
     }
 
     public class PlayerBinder extends Binder {
