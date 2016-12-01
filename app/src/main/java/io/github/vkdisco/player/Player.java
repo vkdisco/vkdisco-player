@@ -1,5 +1,7 @@
 package io.github.vkdisco.player;
 
+import android.util.Log;
+
 import com.un4seen.bass.BASS;
 
 import io.github.vkdisco.model.Track;
@@ -14,6 +16,8 @@ import io.github.vkdisco.player.interfaces.OnTrackSwitchListener;
  */
 @SuppressWarnings("all")
 public class Player implements OnTrackEndListener {
+    private static final String TAG = "Player";
+
     private Playlist playlist;
     private Track currentTrack = null;
     private PlayerState state = PlayerState.EMPTY;
@@ -102,13 +106,17 @@ public class Player implements OnTrackEndListener {
 
     public boolean playTrack(int index) {
         if (playlist == null) {
+            Log.d(TAG, "playTrack: playlist is null!");
             return false;
         }
         Track track = playlist.playTrack(index);
         if (track == null) {
+            Log.d(TAG, "playTrack: track is null!");
             return false;
         }
+        Log.d(TAG, "playTrack: switching track...");
         switchTrack(track);
+        play();
         return true;
     }
 
@@ -209,6 +217,7 @@ public class Player implements OnTrackEndListener {
     private void switchTrack(Track track) {
         free();
         if (track == null) {
+            Log.d(TAG, "switchTrack: track is null!");
             return;
         }
         currentTrack = track;

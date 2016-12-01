@@ -103,7 +103,9 @@ public class PlayerService extends Service implements OnTrackSwitchListener,
     }
 
     public void playTrack(int index) {
-        player.playTrack(index);
+        boolean result = player.playTrack(index);
+        Log.d(TAG, "playTrack: track " + index +
+                (result ? " started playing" : " can't start playing"));
     }
 
     public TrackMetaData getMetadata() {

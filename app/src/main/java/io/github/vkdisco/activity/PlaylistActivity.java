@@ -120,7 +120,10 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
 
     @Override
     public void onPlaylistItemClick(View view, int position) {
-        Toast.makeText(this, "Position: " + position, Toast.LENGTH_SHORT)
-                .show();
+        PlayerService service = getPlayerService();
+        if (service == null) {
+            return;
+        }
+        service.playTrack(position);
     }
 }
