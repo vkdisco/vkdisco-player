@@ -95,7 +95,7 @@ public class PlaylistTest {
         tracks.add(track2);
         tracks.add(track3);
         playlist.addTracks(tracks);
-        assertEquals("Test passed", 2, playlist.getCurrentTrackIndex());
+        assertEquals("Test passed", 3, playlist.count());
 
     }
 
@@ -110,7 +110,7 @@ public class PlaylistTest {
 
 
     @Test
-    public void testRemoveTrackIndex() throws Exception {
+    public void testRemoveTrackAndMoveIndex() throws Exception {
         playlist.addTrack(track1);
         playlist.addTrack(track2);
         playlist.addTrack(track3);
@@ -147,6 +147,7 @@ public class PlaylistTest {
     public void testHasPreviousTrack() throws Exception {
         playlist.addTrack(track1);
         playlist.addTrack(track2);
+        playlist.playTrack(1);
         assertEquals("Test passed", true, playlist.hasPreviousTrack());
     }
 
@@ -165,7 +166,7 @@ public class PlaylistTest {
         playlist.addTrack(track2);
         playlist.addTrack(track3);
         playlist.playTrack(1);
-        assertSame("Test passed", track2, playlist.getPreviousTrack());
+        assertSame("Test passed", track1, playlist.getPreviousTrack());
     }
 
     //Test of getting current track
@@ -183,6 +184,7 @@ public class PlaylistTest {
     public void testGetCurrentTrackIndex() throws Exception {
         playlist.addTrack(track1);
         playlist.addTrack(track2);
+        playlist.playTrack(1);
         assertEquals("Test passed", 1, playlist.getCurrentTrackIndex());
     }
 
