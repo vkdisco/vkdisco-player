@@ -8,7 +8,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 import io.github.vkdisco.R;
 import io.github.vkdisco.adapter.PlaylistAdapter;
@@ -21,7 +23,7 @@ import io.github.vkdisco.service.PlayerService;
  * Playlist activity
  */
 
-public class PlaylistActivity extends PlayerCompatActivity implements View.OnClickListener {
+public class PlaylistActivity extends PlayerCompatActivity implements View.OnClickListener, PlaylistAdapter.OnPlaylistItemClickListener {
     private static final String TAG = "PlaylistActivity";
     private static final int REQ_CODE_ADD_FILE = 1000;
 
@@ -88,6 +90,7 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
         if (mPlaylistAdapter == null) {
             mPlaylistAdapter = new PlaylistAdapter(playlist);
             mRVPlaylist.setAdapter(mPlaylistAdapter);
+            mPlaylistAdapter.setListener(this);
         }
         mPlaylistAdapter.notifyDataSetChanged();
     }
@@ -113,5 +116,11 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
     private void btnAddOnClick() {
         Intent openFileActivityIntent = new Intent(this, OpenFileActivity.class);
         startActivityForResult(openFileActivityIntent, REQ_CODE_ADD_FILE);
+    }
+
+    @Override
+    public void onPlaylistItemClick(View view, int position) {
+        Toast.makeText(this, "Position: " + position, Toast.LENGTH_SHORT)
+                .show();
     }
 }

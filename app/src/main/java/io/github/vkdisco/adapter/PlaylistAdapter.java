@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import java.util.Calendar;
 import java.util.Locale;
 
 import io.github.vkdisco.R;
@@ -23,6 +22,8 @@ import io.github.vkdisco.player.Playlist;
 public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.PlaylistItemHolder> {
     private Playlist mPlaylist;
 
+    private OnPlaylistItemClickListener mListener;
+
     public PlaylistAdapter(Playlist playlist) {
         this.mPlaylist = playlist;
     }
@@ -36,7 +37,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
 
     @Override
     public void onBindViewHolder(PlaylistItemHolder holder, int position) {
-        holder.bind(mPlaylist.getTrack(position));
+        holder.bind(mPlaylist.getTrack(position), position, mListener);
     }
 
     @Override
@@ -44,34 +45,60 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
         return mPlaylist.count();
     }
 
+    public interface OnPlaylistItemClickListener {
+        void onPlaylistItemClick(View view, int position);
+    }
+
+    public void setListener(OnPlaylistItemClickListener listener) {
+        this.mListener = listener;
+    }
 
     public static class PlaylistItemHolder extends RecyclerView.ViewHolder {
-        private TextView tvArtist;
-        private TextView tvTitle;
-        private TextView tvDuration;
-        private ImageButton imgBtnMore;
+        private TextView mTVArtist;
+        private TextView mTVTitle;
+        private TextView mTVDuration;
+        private ImageButton mImgBtnMore;
+
+        private OnPlaylistItemClickListener mListener;
+
+        private int mPosition;
+
         public PlaylistItemHolder(View itemView) {
             super(itemView);
-            tvArtist = ((TextView) itemView.findViewById(R.id.tvArtist));
-            tvTitle = ((TextView) itemView.findViewById(R.id.tvTitle));
-            tvDuration = ((TextView) itemView.findViewById(R.id.tvDuration));
-            imgBtnMore = ((ImageButton) itemView.findViewById(R.id.imgBtnMore));
+            mTVArtist = ((TextView) itemView.findViewById(R.id.tvArtist));
+            mTVTitle = ((TextView) itemView.findViewById(R.id.tvTitle));
+            mTVDuration = ((TextView) itemView.findViewById(R.id.tvDuration));
+            mImgBtnMore = ((ImageButton) itemView.findViewById(R.id.imgBtnMore));
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mListener != null) {
+                        mListener.onPlaylistItemClick(v, mPosition);
+                    }
+                }
+            });
         }
 
-        public void bind(final Track track) {
+        public void bind(Track track, int position, OnPlaylistItemClickListener listener) {
             TrackMetaData metaData = track.getMetaData();
             if (metaData == null) {
-                tvArtist.setText(R.string.text_label_no_metadata);
-                tvTitle.setText(R.string.text_label_no_metadata);
-                tvDuration.setText("--:--");
+                mTVArtist.setText(R.string.text_label_no_metadata);
+                mTVTitle.setText(R.string.text_label_no_metadata);
+                mTVDuration.setText("--:--");
                 return;
             }
-            tvArtist.setText(metaData.getArtist());
-            tvTitle.setText(metaData.getTitle());
+
+            mTVArtist.setText(metaData.getArtist());
+            mTVTitle.setText(metaData.getTitle());
+
             int seconds = (int) (metaData.getDuration() / 1000); // Conversion from ms to seconds
             int minutes = seconds / 60;
             seconds %= 60;
-            tvDuration.setText(String.format(Locale.getDefault(), "%2d:%2d", minutes, seconds));
+            mTVDuration.setText(String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds));
+
+            mPosition = position;
+
+            mListener = listener;
         }
     }
 }
