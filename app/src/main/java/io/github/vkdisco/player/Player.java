@@ -238,14 +238,6 @@ public class Player implements OnTrackEndListener {
         if (currentTrack == null) {
             return false;
         }
-//        if (!currentTrack.isDataLoaded()) {
-//            return false;
-//        }
-//        if (!currentTrack.load()) {
-//            return false;
-//        }
-//        trackSyncEnd = BASS.BASS_ChannelSetSync(currentTrack.getChannelHandle(),
-//                BASS.BASS_SYNC_END, 0, trackEndNotifier, null);
         if (!currentTrack.isLoaded()) {
             return false;
         }
