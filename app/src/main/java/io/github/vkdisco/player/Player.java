@@ -221,6 +221,14 @@ public class Player implements OnTrackEndListener {
             return;
         }
         currentTrack = track;
+        if (!currentTrack.isDataLoaded()) {
+            return;
+        }
+        if (!currentTrack.load()) {
+            return;
+        }
+        trackSyncEnd = BASS.BASS_ChannelSetSync(currentTrack.getChannelHandle(),
+                BASS.BASS_SYNC_END, 0, trackEndNotifier, null);
     }
 
     private boolean startPlaying() {
@@ -230,14 +238,17 @@ public class Player implements OnTrackEndListener {
         if (currentTrack == null) {
             return false;
         }
-        if (!currentTrack.isDataLoaded()) {
+//        if (!currentTrack.isDataLoaded()) {
+//            return false;
+//        }
+//        if (!currentTrack.load()) {
+//            return false;
+//        }
+//        trackSyncEnd = BASS.BASS_ChannelSetSync(currentTrack.getChannelHandle(),
+//                BASS.BASS_SYNC_END, 0, trackEndNotifier, null);
+        if (!currentTrack.isLoaded()) {
             return false;
         }
-        if (!currentTrack.load()) {
-            return false;
-        }
-        trackSyncEnd = BASS.BASS_ChannelSetSync(currentTrack.getChannelHandle(),
-                BASS.BASS_SYNC_END, 0, trackEndNotifier, null);
         if (!BASS.BASS_ChannelPlay(currentTrack.getChannelHandle(), false)) {
             return false;
         }
