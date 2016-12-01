@@ -22,24 +22,11 @@ public class VKTrack extends Track {
     private String url;
 
     public VKTrack(VKApiAudio vkApiAudio) {
-        super();
         setMetaData(getTrackMetaData(vkApiAudio));
         this.id = vkApiAudio.id;
         this.ownerID = vkApiAudio.owner_id;
     }
 
-    public VKTrack(TrackMetaData metaData, int channelHandle,
-                   OnTrackDataLoadedListener onTrackLoadedListener, int id, int ownerID) {
-        super(metaData, channelHandle, onTrackLoadedListener);
-        this.id = id;
-        this.ownerID = ownerID;
-    }
-
-    public VKTrack(TrackMetaData metaData, int id, int ownerID) {
-        super(metaData);
-        this.id = id;
-        this.ownerID = ownerID;
-    }
 
     @Override
     public void requestDataLoad() {
@@ -70,6 +57,7 @@ public class VKTrack extends Track {
                         vkAudio.parse(json);
                         setMetaData(getTrackMetaData(vkAudio));
                         url = vkAudio.url;
+                        setDataLoaded(true);
                         if (getOnTrackDataLoadedListener() != null) {
                             getOnTrackDataLoadedListener().onTrackDataLoaded(true);
                         }
@@ -94,11 +82,7 @@ public class VKTrack extends Track {
         metaData.setTitle(vkAudio.title);
         metaData.setArtist(vkAudio.artist);
         metaData.setDuration(vkAudio.duration);
-/*
-        metaData.setYear();
-        metaData.setAlbum();
-        metaData.setAlbumArt();
-*/
+
         return metaData;
     }
 
