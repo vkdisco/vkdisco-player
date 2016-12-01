@@ -8,14 +8,15 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import io.github.vkdisco.R;
 import io.github.vkdisco.adapter.PlaylistAdapter;
 import io.github.vkdisco.filebrowser.OpenFileActivity;
 import io.github.vkdisco.model.FileTrack;
+import io.github.vkdisco.model.TrackMetaData;
 import io.github.vkdisco.player.Playlist;
 import io.github.vkdisco.service.PlayerService;
 
@@ -30,6 +31,10 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
     // Playlist's view
     private RecyclerView mRVPlaylist;
     private PlaylistAdapter mPlaylistAdapter;
+
+    private ProgressBar mPBMusicProgress;
+    private TextView mTVArtist;
+    private TextView mTVTitle;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -50,6 +55,11 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
         if (mRVPlaylist != null) {
             mRVPlaylist.setLayoutManager(new LinearLayoutManager(this));
         }
+
+        mPBMusicProgress = ((ProgressBar) findViewById(R.id.pbMusicProgress));
+
+        mTVArtist = ((TextView) findViewById(R.id.tvArtist));
+        mTVTitle = ((TextView) findViewById(R.id.tvTitle));
     }
 
     @Override
@@ -59,6 +69,63 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
                 btnAddOnClick();
                 break;
         }
+    }
+
+    @Override
+    public void onPlaylistChanged() {
+        super.onPlaylistChanged();
+        PlayerService service = getPlayerService();
+        if (service == null) {
+            Log.d(TAG, "onPlaylistChanged: service is null :(");
+            return;
+        }
+        Playlist playlist = service.getPlaylist();
+        if (playlist == null) {
+            Log.d(TAG, "onPlaylistChanged: playlist is null :(");
+            return;
+        }
+        if (mPlaylistAdapter == null) {
+            Log.d(TAG, "onPlaylistChanged: creating new adapter");
+            mPlaylistAdapter = new PlaylistAdapter(playlist);
+            mRVPlaylist.setAdapter(mPlaylistAdapter);
+            mPlaylistAdapter.setListener(this);
+        }
+        Log.d(TAG, "onPlaylistChanged: data set changed");
+        mPlaylistAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onPlaylistItemClick(View view, int position) {
+        PlayerService service = getPlayerService();
+        if (service == null) {
+            return;
+        }
+        service.playTrack(position);
+    }
+
+    @Override
+    public void onTrackPositionUpdate(double position) {
+        super.onTrackPositionUpdate(position);
+        mPBMusicProgress.setProgress((int) (100 * position));
+    }
+
+    @Override
+    public void onTrackSwitched() {
+        super.onTrackSwitched();
+        Log.d(TAG, "onTrackSwitched: called :3");
+        PlayerService service = getPlayerService();
+        if (service == null) {
+            Log.d(TAG, "onTrackSwitched: service is null :(");
+            return;
+        }
+        TrackMetaData metaData = service.getMetadata();
+        if (metaData == null) {
+            mTVArtist.setText(R.string.text_label_no_metadata);
+            mTVTitle.setText(R.string.text_label_no_metadata);
+            return;
+        }
+        mTVArtist.setText(metaData.getArtist());
+        mTVTitle.setText(metaData.getTitle());
     }
 
     @Override
@@ -74,25 +141,6 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
             performAddingFile(filename);
         }
         super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    @Override
-    public void onPlaylistChanged() {
-        super.onPlaylistChanged();
-        PlayerService service = getPlayerService();
-        if (service == null) {
-            return;
-        }
-        Playlist playlist = service.getPlaylist();
-        if (playlist == null) {
-            return;
-        }
-        if (mPlaylistAdapter == null) {
-            mPlaylistAdapter = new PlaylistAdapter(playlist);
-            mRVPlaylist.setAdapter(mPlaylistAdapter);
-            mPlaylistAdapter.setListener(this);
-        }
-        mPlaylistAdapter.notifyDataSetChanged();
     }
 
     private void performAddingFile(String filename) {
@@ -116,14 +164,5 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
     private void btnAddOnClick() {
         Intent openFileActivityIntent = new Intent(this, OpenFileActivity.class);
         startActivityForResult(openFileActivityIntent, REQ_CODE_ADD_FILE);
-    }
-
-    @Override
-    public void onPlaylistItemClick(View view, int position) {
-        PlayerService service = getPlayerService();
-        if (service == null) {
-            return;
-        }
-        service.playTrack(position);
     }
 }

@@ -46,6 +46,8 @@ public class PlayerService extends Service implements OnTrackSwitchListener,
         super.onCreate();
         BASS.BASS_Init(-1, 44100, 0);
         player = new Player();
+        player.setStateChangedListener(this);
+        player.setTrackSwitchListener(this);
         playlist = new Playlist(this); // STUB!
         // TODO: 17.11.2016 Load default playlist (w loadPlaylist())
         player.setPlaylist(playlist);

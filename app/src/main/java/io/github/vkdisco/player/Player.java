@@ -229,6 +229,9 @@ public class Player implements OnTrackEndListener {
         }
         trackSyncEnd = BASS.BASS_ChannelSetSync(currentTrack.getChannelHandle(),
                 BASS.BASS_SYNC_END, 0, trackEndNotifier, null);
+        if (trackSwitchListener != null) {
+            trackSwitchListener.onTrackSwitch();
+        }
     }
 
     private boolean startPlaying() {
