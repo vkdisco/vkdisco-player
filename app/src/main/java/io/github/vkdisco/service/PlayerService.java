@@ -142,7 +142,11 @@ public class PlayerService extends Service implements OnTrackSwitchListener,
     @Override
     public void onPlayerStateChanged(PlayerState state) {
         Log.d(TAG, "onPlayerStateChanged: i'm called :O");
-        sendEventBroadcast(EVENT_STATE_CHANGED);
+        Intent broadcastIntent = new Intent();
+        broadcastIntent.setAction(BROADCAST_ACTION_EVENT);
+        broadcastIntent.putExtra(EXTRA_EVENT, EVENT_STATE_CHANGED);
+        broadcastIntent.putExtra(EXTRA_STATE, state.name());
+        sendBroadcast(broadcastIntent);
     }
 
     @Override

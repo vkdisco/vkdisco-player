@@ -1,6 +1,7 @@
 package io.github.vkdisco.activity;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -9,6 +10,9 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -17,6 +21,7 @@ import io.github.vkdisco.adapter.PlaylistAdapter;
 import io.github.vkdisco.filebrowser.OpenFileActivity;
 import io.github.vkdisco.model.FileTrack;
 import io.github.vkdisco.model.TrackMetaData;
+import io.github.vkdisco.player.PlayerState;
 import io.github.vkdisco.player.Playlist;
 import io.github.vkdisco.service.PlayerService;
 
@@ -35,6 +40,10 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
     private ProgressBar mPBMusicProgress;
     private TextView mTVArtist;
     private TextView mTVTitle;
+
+    private ImageView mIVAlbumArt;
+
+    ImageButton mBtnPlayPause;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -60,6 +69,13 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
 
         mTVArtist = ((TextView) findViewById(R.id.tvArtist));
         mTVTitle = ((TextView) findViewById(R.id.tvTitle));
+
+        mIVAlbumArt = ((ImageView) findViewById(R.id.ivAlbumArt));
+
+        mBtnPlayPause = ((ImageButton) findViewById(R.id.btnPlayPause));
+        if (mBtnPlayPause != null) {
+            mBtnPlayPause.setOnClickListener(this);
+        }
     }
 
     @Override
@@ -68,6 +84,24 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
             case R.id.btnAdd:
                 btnAddOnClick();
                 break;
+            case R.id.btnPlayPause:
+                btnPlayPauseClick();
+                break;
+        }
+    }
+
+    private void btnPlayPauseClick() {
+        PlayerService service = getPlayerService();
+        if (service == null) {
+            return;
+        }
+        PlayerState state = service.getPlayerState();
+        if (state == PlayerState.PLAYING) {
+            service.pause();
+            return;
+        }
+        if (state == PlayerState.PAUSED) {
+            service.play();
         }
     }
 
@@ -126,6 +160,27 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
         }
         mTVArtist.setText(metaData.getArtist());
         mTVTitle.setText(metaData.getTitle());
+
+        Bitmap albumArt = metaData.getAlbumArt();
+        if (albumArt == null) {
+            mIVAlbumArt.setImageResource(R.mipmap.ic_music_white);
+        } else {
+            mIVAlbumArt.setImageBitmap(albumArt);
+        }
+    }
+
+    @Override
+    public void onStateChanged(PlayerState state) {
+        super.onStateChanged(state);
+        Log.d(TAG, "onStateChanged: my new state: " + state.name());
+        switch (state) {
+            case PLAYING:
+                mBtnPlayPause.setImageResource(R.drawable.ic_pause_white_24dp);
+                break;
+            case PAUSED:
+                mBtnPlayPause.setImageResource(R.drawable.ic_play_arrow_white_24dp);
+                break;
+        }
     }
 
     @Override
