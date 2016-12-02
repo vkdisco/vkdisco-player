@@ -11,4 +11,5 @@
     <string name="search_button_text">Search</string>
     <string name="mainmenu_button_text">Main menu</string>
     <string name="title_vk_friends_dialog">Choose VK user</string>
+    <string name="text_label_no_metadata">No metadata</string>
 </resources>

@@ -3,4 +3,7 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
+    <dimen name="list_item_file_image_size">50dp</dimen>
+    <dimen name="list_item_file_image_margin">5dp</dimen>
+    <dimen name="list_item_file_text_size">20sp</dimen>
 </resources>

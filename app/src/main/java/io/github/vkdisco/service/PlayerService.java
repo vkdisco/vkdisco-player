@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.un4seen.bass.BASS;
 
@@ -24,6 +25,8 @@ import io.github.vkdisco.player.interfaces.OnTrackSwitchListener;
 
 public class PlayerService extends Service implements OnTrackSwitchListener,
         OnPlayerStateChangedListener, OnPlaylistChangedListener {
+    private static final String TAG = "PlayerService";
+
     public static final String EXTRA_WAKEUP = "io.github.vkdisco.PlayerService.EXTRA.WAKEUP";
     public static final String EXTRA_EVENT = "io.github.vkdisco.PlayerService.EXTRA.EVENT";
     public static final String EXTRA_STATE = "io.github.vkdisco.PlayerService.EXTRA.STATE";
@@ -43,7 +46,11 @@ public class PlayerService extends Service implements OnTrackSwitchListener,
         super.onCreate();
         BASS.BASS_Init(-1, 44100, 0);
         player = new Player();
+        player.setStateChangedListener(this);
+        player.setTrackSwitchListener(this);
+        playlist = new Playlist(this); // STUB!
         // TODO: 17.11.2016 Load default playlist (w loadPlaylist())
+        player.setPlaylist(playlist);
     }
 
     @Override
@@ -98,7 +105,9 @@ public class PlayerService extends Service implements OnTrackSwitchListener,
     }
 
     public void playTrack(int index) {
-        player.playTrack(index);
+        boolean result = player.playTrack(index);
+        Log.d(TAG, "playTrack: track " + index +
+                (result ? " started playing" : " can't start playing"));
     }
 
     public TrackMetaData getMetadata() {
@@ -132,17 +141,31 @@ public class PlayerService extends Service implements OnTrackSwitchListener,
     //Callbacks
     @Override
     public void onPlayerStateChanged(PlayerState state) {
-        //...
+        Log.d(TAG, "onPlayerStateChanged: i'm called :O");
+        Intent broadcastIntent = new Intent();
+        broadcastIntent.setAction(BROADCAST_ACTION_EVENT);
+        broadcastIntent.putExtra(EXTRA_EVENT, EVENT_STATE_CHANGED);
+        broadcastIntent.putExtra(EXTRA_STATE, state.name());
+        sendBroadcast(broadcastIntent);
     }
 
     @Override
     public void onPlaylistChanged() {
-        //...
+        Log.d(TAG, "onPlaylistChanged: i'm called;)");
+        sendEventBroadcast(EVENT_PLAYLIST_CHANGED);
     }
 
     @Override
     public void onTrackSwitch() {
-        //...
+        Log.d(TAG, "onTrackSwitch: i'm called :P");
+        sendEventBroadcast(EVENT_TRACK_SWITCHED);
+    }
+
+    private void sendEventBroadcast(String event) {
+        Intent broadcastIntent = new Intent();
+        broadcastIntent.setAction(BROADCAST_ACTION_EVENT);
+        broadcastIntent.putExtra(EXTRA_EVENT, event);
+        sendBroadcast(broadcastIntent);
     }
 
     public class PlayerBinder extends Binder {

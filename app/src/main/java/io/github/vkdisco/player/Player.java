@@ -1,5 +1,7 @@
 package io.github.vkdisco.player;
 
+import android.util.Log;
+
 import com.un4seen.bass.BASS;
 
 import io.github.vkdisco.model.Track;
@@ -14,6 +16,8 @@ import io.github.vkdisco.player.interfaces.OnTrackSwitchListener;
  */
 @SuppressWarnings("all")
 public class Player implements OnTrackEndListener {
+    private static final String TAG = "Player";
+
     private Playlist playlist;
     private Track currentTrack = null;
     private PlayerState state = PlayerState.EMPTY;
@@ -102,13 +106,17 @@ public class Player implements OnTrackEndListener {
 
     public boolean playTrack(int index) {
         if (playlist == null) {
+            Log.d(TAG, "playTrack: playlist is null!");
             return false;
         }
         Track track = playlist.playTrack(index);
         if (track == null) {
+            Log.d(TAG, "playTrack: track is null!");
             return false;
         }
+        Log.d(TAG, "playTrack: switching track...");
         switchTrack(track);
+        play();
         return true;
     }
 
@@ -209,9 +217,21 @@ public class Player implements OnTrackEndListener {
     private void switchTrack(Track track) {
         free();
         if (track == null) {
+            Log.d(TAG, "switchTrack: track is null!");
             return;
         }
         currentTrack = track;
+        if (!currentTrack.isDataLoaded()) {
+            return;
+        }
+        if (!currentTrack.load()) {
+            return;
+        }
+        trackSyncEnd = BASS.BASS_ChannelSetSync(currentTrack.getChannelHandle(),
+                BASS.BASS_SYNC_END, 0, trackEndNotifier, null);
+        if (trackSwitchListener != null) {
+            trackSwitchListener.onTrackSwitch();
+        }
     }
 
     private boolean startPlaying() {
@@ -221,14 +241,9 @@ public class Player implements OnTrackEndListener {
         if (currentTrack == null) {
             return false;
         }
-        if (!currentTrack.isDataLoaded()) {
+        if (!currentTrack.isLoaded()) {
             return false;
         }
-        if (!currentTrack.load()) {
-            return false;
-        }
-        trackSyncEnd = BASS.BASS_ChannelSetSync(currentTrack.getChannelHandle(),
-                BASS.BASS_SYNC_END, 0, trackEndNotifier, null);
         if (!BASS.BASS_ChannelPlay(currentTrack.getChannelHandle(), false)) {
             return false;
         }

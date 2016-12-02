@@ -24,7 +24,7 @@ public class TrackAdapter extends TypeAdapter<Track> {
             FileTrack fileTrack = (FileTrack) value;
             out.beginObject();
             out.name("type").value(fileTrack.getClass().getSimpleName());
-            out.name("path").value(fileTrack.getFile().getAbsolutePath());
+            out.name("path").value(fileTrack.getPath());
             out.name("title").value(metaData.getTitle());
             out.name("artist").value(metaData.getArtist());
             out.name("year").value(metaData.getYear());
@@ -90,7 +90,7 @@ public class TrackAdapter extends TypeAdapter<Track> {
         in.endObject();
 
         if (path != null) {
-            return new FileTrack(metaData, path);
+            return new FileTrack(path);
         } else if (id != null && ownerID != null) {
             return new VKTrack(metaData, id, ownerID);
         } else {
