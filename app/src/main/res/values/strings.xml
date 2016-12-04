@@ -14,4 +14,5 @@
     <string name="title_vk_friends_dialog">Choose VK user</string>
     <string name="text_label_no_metadata">No metadata</string>
     <string name="action_bar_btn_vk_title">VK</string>
+    <string name="title_vk_tracks_dialog">VK tracks</string>
 </resources>

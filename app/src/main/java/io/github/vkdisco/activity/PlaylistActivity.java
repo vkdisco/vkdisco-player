@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -12,6 +13,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
@@ -22,11 +24,18 @@ import android.widget.TextView;
 
 import com.vk.sdk.VKScope;
 import com.vk.sdk.VKSdk;
+import com.vk.sdk.api.model.VKApiUser;
 
 import io.github.vkdisco.R;
 import io.github.vkdisco.adapter.PlaylistAdapter;
+import io.github.vkdisco.adapter.PlaylistAdapter.OnPlaylistItemClickListener;
 import io.github.vkdisco.filebrowser.OpenFileActivity;
+import io.github.vkdisco.fragment.VKFriendsDialog;
+import io.github.vkdisco.fragment.VKTracksDialog;
+import io.github.vkdisco.fragment.interfaces.OnTrackSelectedListener;
+import io.github.vkdisco.fragment.interfaces.OnUserSelectedListener;
 import io.github.vkdisco.model.FileTrack;
+import io.github.vkdisco.model.Track;
 import io.github.vkdisco.model.TrackMetaData;
 import io.github.vkdisco.player.PlayerState;
 import io.github.vkdisco.player.Playlist;
@@ -36,7 +45,9 @@ import io.github.vkdisco.service.PlayerService;
  * Playlist activity
  */
 
-public class PlaylistActivity extends PlayerCompatActivity implements View.OnClickListener, PlaylistAdapter.OnPlaylistItemClickListener {
+public class PlaylistActivity extends PlayerCompatActivity
+        implements OnClickListener, OnPlaylistItemClickListener, OnUserSelectedListener,
+        OnTrackSelectedListener {
     private static final String TAG = "PlaylistActivity";
     private static final int REQ_CODE_ADD_FILE = 1000;
 
@@ -141,7 +152,6 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btnAdd:
-                //btnAddOnClick();
                 if (!fabStatus) {
                     expandFAB();
                     fabStatus = true;
@@ -149,6 +159,12 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
                     hideFAB();
                     fabStatus = false;
                 }
+                break;
+            case R.id.btnFile:
+                btnAddFromFileOnClick();
+                break;
+            case R.id.btnVK:
+                btnAddFromVKOnClick();
                 break;
             case R.id.btnPlayPause:
                 btnPlayPauseClick();
@@ -271,21 +287,26 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
         }
         PlayerService service = getPlayerService();
         if (service == null) {
-            Log.d(TAG, "btnAddOnClick: Service is null!");
+            Log.d(TAG, "btnAddFromFileOnClick: Service is null!");
             return;
         }
         Playlist playlist = service.getPlaylist();
         if (playlist == null) {
-            Log.d(TAG, "btnAddOnClick: Playlist is null!");
+            Log.d(TAG, "btnAddFromFileOnClick: Playlist is null!");
             return;
         }
         Log.d(TAG, "performAddingFile: Opening file: " + filename);
         playlist.addTrack(new FileTrack(filename));
     }
 
-    private void btnAddOnClick() {
+    private void btnAddFromFileOnClick() {
         Intent openFileActivityIntent = new Intent(this, OpenFileActivity.class);
         startActivityForResult(openFileActivityIntent, REQ_CODE_ADD_FILE);
+    }
+
+    private void btnAddFromVKOnClick() {
+        DialogFragment dialog = new VKFriendsDialog();
+        dialog.show(getSupportFragmentManager(), "vk_friends_dialog");
     }
 
     private void expandFAB() {
@@ -325,5 +346,30 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
         btnVK.setLayoutParams(layoutParams2);
         btnVK.startAnimation(hide_fab_vk);
         btnVK.setClickable(false);
+    }
+
+    @Override
+    public void onUserSelected(VKApiUser vkApiUser) {
+        Bundle bundle = new Bundle();
+        bundle.putInt("user_id", vkApiUser.id);
+        DialogFragment dialog = new VKTracksDialog();
+        dialog.setArguments(bundle);
+        dialog.show(getSupportFragmentManager(), "vk_track_dialog");
+    }
+
+    @Override
+    public void onTrackSelected(Track track) {
+        PlayerService service = getPlayerService();
+        if (service == null) {
+            Log.d(TAG, "onTrackSelected: Service is null!");
+            return;
+        }
+        Playlist playlist = service.getPlaylist();
+        if (playlist == null) {
+            Log.d(TAG, "onTrackSelected: Playlist is null!");
+            return;
+        }
+        Log.d(TAG, "onTrackSelected: Loading url of track: " + track.getMetaData().getTitle());
+        playlist.addTrack(track);
     }
 }
