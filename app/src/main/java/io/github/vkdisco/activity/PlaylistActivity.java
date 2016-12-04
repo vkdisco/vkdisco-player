@@ -9,12 +9,16 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.vk.sdk.VKScope;
+import com.vk.sdk.VKSdk;
 
 import io.github.vkdisco.R;
 import io.github.vkdisco.adapter.PlaylistAdapter;
@@ -32,6 +36,13 @@ import io.github.vkdisco.service.PlayerService;
 public class PlaylistActivity extends PlayerCompatActivity implements View.OnClickListener, PlaylistAdapter.OnPlaylistItemClickListener {
     private static final String TAG = "PlaylistActivity";
     private static final int REQ_CODE_ADD_FILE = 1000;
+
+    // Custom scope for our app
+    private static final String[] sScope = new String[]{
+            VKScope.FRIENDS,
+            VKScope.AUDIO,
+            VKScope.NOHTTPS,
+    };
 
     // Playlist's view
     private RecyclerView mRVPlaylist;
@@ -79,6 +90,26 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_toolbar_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.btnVK) {
+            if (VKSdk.isLoggedIn()) {
+                VKSdk.login(this, sScope);
+            } else {
+                VKSdk.logout();
+            }
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btnAdd:
@@ -87,21 +118,6 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
             case R.id.btnPlayPause:
                 btnPlayPauseClick();
                 break;
-        }
-    }
-
-    private void btnPlayPauseClick() {
-        PlayerService service = getPlayerService();
-        if (service == null) {
-            return;
-        }
-        PlayerState state = service.getPlayerState();
-        if (state == PlayerState.PLAYING) {
-            service.pause();
-            return;
-        }
-        if (state == PlayerState.PAUSED) {
-            service.play();
         }
     }
 
@@ -169,16 +185,17 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
         }
     }
 
+    //// FIXME: 04.12.16 Drawable resource doesn't exist
     @Override
     public void onStateChanged(PlayerState state) {
         super.onStateChanged(state);
         Log.d(TAG, "onStateChanged: my new state: " + state.name());
         switch (state) {
             case PLAYING:
-                mBtnPlayPause.setImageResource(R.drawable.ic_pause_white_24dp);
+                mBtnPlayPause.setImageResource(android.R.drawable.ic_media_pause);
                 break;
             case PAUSED:
-                mBtnPlayPause.setImageResource(R.drawable.ic_play_arrow_white_24dp);
+                mBtnPlayPause.setImageResource(android.R.drawable.ic_media_play);
                 break;
         }
     }
@@ -196,6 +213,21 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
             performAddingFile(filename);
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void btnPlayPauseClick() {
+        PlayerService service = getPlayerService();
+        if (service == null) {
+            return;
+        }
+        PlayerState state = service.getPlayerState();
+        if (state == PlayerState.PLAYING) {
+            service.pause();
+            return;
+        }
+        if (state == PlayerState.PAUSED) {
+            service.play();
+        }
     }
 
     private void performAddingFile(String filename) {

@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">vkDisco</string>
+    <integer name="com_vk_sdk_AppId">5666525</integer>
     <string name="btn_load_file_text">Load file</string>
     <string name="btn_play_text">Play</string>
     <string name="btn_pause_text">Pause</string>
@@ -12,4 +13,5 @@
     <string name="mainmenu_button_text">Main menu</string>
     <string name="title_vk_friends_dialog">Choose VK user</string>
     <string name="text_label_no_metadata">No metadata</string>
+    <string name="action_bar_btn_vk_title">VK</string>
 </resources>
