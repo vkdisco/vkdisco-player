@@ -11,6 +11,7 @@ import java.util.List;
 import io.github.vkdisco.R;
 import io.github.vkdisco.adapter.interfaces.OnTrackClickListener;
 import io.github.vkdisco.model.Track;
+import io.github.vkdisco.model.TrackMetaData;
 
 /**
  * Created by tkaczenko on 20.11.16.
@@ -55,10 +56,17 @@ public class TrackAdapter extends
         }
 
         void bind(final Track track, final OnTrackClickListener listener) {
-            artist.setText(track.getMetaData().getArtist());
-            title.setText(track.getMetaData().getTitle());
-            //// FIXME: 20.11.16 Implement String getDuration() for MetaData
-            duration.setText(String.valueOf(track.getMetaData().getDuration()));
+            TrackMetaData metaData = track.getMetaData();
+            if (metaData == null) {
+                artist.setText(R.string.text_label_no_metadata);
+                title.setText(R.string.text_label_no_metadata);
+                duration.setText("--:--");
+                return;
+            }
+
+            artist.setText(metaData.getArtist());
+            title.setText(metaData.getTitle());
+            duration.setText(metaData.getTime());
             //// TODO: 20.11.16 Implement three dots action
             this.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -2,6 +2,8 @@ package io.github.vkdisco.model;
 
 import android.graphics.Bitmap;
 
+import java.util.Locale;
+
 /**
  * Created by tkaczenko on 11.11.16.
  */
@@ -83,5 +85,11 @@ public class TrackMetaData {
 
     public void setDuration(long duration) {
         this.duration = duration;
+    }
+
+    public String getTime() {
+        Long minutes = (duration % 3600) / 60;
+        Long seconds = duration % 60;
+        return String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
     }
 }
