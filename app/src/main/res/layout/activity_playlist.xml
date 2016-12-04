@@ -96,6 +96,28 @@
             app:elevation="5dp"
             app:srcCompat="@drawable/ic_add_white" />
 
+        <!--FIXME Add custom icon -->
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/btnFile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="@dimen/fab_margin"
+            android:src="@android:drawable/ic_menu_myplaces"
+            android:visibility="invisible"
+            app:fabSize="mini" />
+
+        <!--FIXME Add custom icon -->
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/btnVK"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="@dimen/fab_margin"
+            android:src="@android:drawable/ic_menu_share"
+            android:visibility="invisible"
+            app:fabSize="mini" />
+
     </FrameLayout>
 
 </LinearLayout>

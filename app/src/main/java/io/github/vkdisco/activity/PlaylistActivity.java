@@ -12,6 +12,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -56,6 +59,17 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
 
     ImageButton mBtnPlayPause;
 
+    private boolean fabStatus = false;
+
+    private FloatingActionButton btnAdd;
+    private FloatingActionButton btnFile;
+    private FloatingActionButton btnVK;
+
+    private Animation show_fab_file;
+    private Animation hide_fab_file;
+    private Animation show_fab_vk;
+    private Animation hide_fab_vk;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,11 +78,25 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
         Toolbar toolbar = ((Toolbar) findViewById(R.id.toolbar));
         setSupportActionBar(toolbar);
 
-        // FAB
-        FloatingActionButton btnAdd = ((FloatingActionButton) findViewById(R.id.btnAdd));
+        // FABs
+        btnAdd = ((FloatingActionButton) findViewById(R.id.btnAdd));
         if (btnAdd != null) {
             btnAdd.setOnClickListener(this);
         }
+        btnFile = (FloatingActionButton) findViewById(R.id.btnFile);
+        if (btnFile != null) {
+            btnFile.setOnClickListener(this);
+        }
+        btnVK = (FloatingActionButton) findViewById(R.id.btnVK);
+        if (btnVK != null) {
+            btnVK.setOnClickListener(this);
+        }
+
+        // Animations
+        show_fab_file = AnimationUtils.loadAnimation(getApplication(), R.anim.show_fab_file);
+        hide_fab_file = AnimationUtils.loadAnimation(getApplication(), R.anim.hide_fab_file);
+        show_fab_vk = AnimationUtils.loadAnimation(getApplication(), R.anim.show_fab_vk);
+        hide_fab_vk = AnimationUtils.loadAnimation(getApplication(), R.anim.hide_fab_vk);
 
         // Playlist's recycler view
         mRVPlaylist = ((RecyclerView) findViewById(R.id.rvPlaylist));
@@ -113,7 +141,14 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btnAdd:
-                btnAddOnClick();
+                //btnAddOnClick();
+                if (!fabStatus) {
+                    expandFAB();
+                    fabStatus = true;
+                } else {
+                    hideFAB();
+                    fabStatus = false;
+                }
                 break;
             case R.id.btnPlayPause:
                 btnPlayPauseClick();
@@ -251,5 +286,44 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
     private void btnAddOnClick() {
         Intent openFileActivityIntent = new Intent(this, OpenFileActivity.class);
         startActivityForResult(openFileActivityIntent, REQ_CODE_ADD_FILE);
+    }
+
+    private void expandFAB() {
+
+        //Floating Action Button File
+        FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) btnFile.getLayoutParams();
+        layoutParams.rightMargin += (int) (btnFile.getWidth() * 1.7);
+        layoutParams.bottomMargin += (int) (btnFile.getHeight() * 0.25);
+        btnFile.setLayoutParams(layoutParams);
+        btnFile.startAnimation(show_fab_file);
+        btnFile.setClickable(true);
+
+        //Floating Action Button VK
+        FrameLayout.LayoutParams layoutParams2 = (FrameLayout.LayoutParams) btnVK.getLayoutParams();
+        layoutParams2.rightMargin += (int) (btnVK.getWidth() * 1.5);
+        layoutParams2.bottomMargin += (int) (btnVK.getHeight() * 1.5);
+        btnVK.setLayoutParams(layoutParams2);
+        btnVK.startAnimation(show_fab_vk);
+        btnVK.setClickable(true);
+    }
+
+
+    private void hideFAB() {
+
+        //Floating Action Button File
+        FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) btnFile.getLayoutParams();
+        layoutParams.rightMargin -= (int) (btnFile.getWidth() * 1.7);
+        layoutParams.bottomMargin -= (int) (btnFile.getHeight() * 0.25);
+        btnFile.setLayoutParams(layoutParams);
+        btnFile.startAnimation(hide_fab_file);
+        btnFile.setClickable(false);
+
+        //Floating Action Button VK
+        FrameLayout.LayoutParams layoutParams2 = (FrameLayout.LayoutParams) btnVK.getLayoutParams();
+        layoutParams2.rightMargin -= (int) (btnVK.getWidth() * 1.5);
+        layoutParams2.bottomMargin -= (int) (btnVK.getHeight() * 1.5);
+        btnVK.setLayoutParams(layoutParams2);
+        btnVK.startAnimation(hide_fab_vk);
+        btnVK.setClickable(false);
     }
 }
