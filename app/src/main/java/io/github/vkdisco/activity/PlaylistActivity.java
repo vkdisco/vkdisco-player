@@ -5,21 +5,37 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
+import android.view.View.OnClickListener;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.vk.sdk.VKScope;
+import com.vk.sdk.VKSdk;
+import com.vk.sdk.api.model.VKApiUser;
+
 import io.github.vkdisco.R;
 import io.github.vkdisco.adapter.PlaylistAdapter;
+import io.github.vkdisco.adapter.PlaylistAdapter.OnPlaylistItemClickListener;
 import io.github.vkdisco.filebrowser.OpenFileActivity;
+import io.github.vkdisco.fragment.VKFriendsDialog;
+import io.github.vkdisco.fragment.VKTracksDialog;
+import io.github.vkdisco.fragment.interfaces.OnTrackSelectedListener;
+import io.github.vkdisco.fragment.interfaces.OnUserSelectedListener;
 import io.github.vkdisco.model.FileTrack;
+import io.github.vkdisco.model.Track;
 import io.github.vkdisco.model.TrackMetaData;
 import io.github.vkdisco.player.PlayerState;
 import io.github.vkdisco.player.Playlist;
@@ -29,9 +45,18 @@ import io.github.vkdisco.service.PlayerService;
  * Playlist activity
  */
 
-public class PlaylistActivity extends PlayerCompatActivity implements View.OnClickListener, PlaylistAdapter.OnPlaylistItemClickListener {
+public class PlaylistActivity extends PlayerCompatActivity
+        implements OnClickListener, OnPlaylistItemClickListener, OnUserSelectedListener,
+        OnTrackSelectedListener {
     private static final String TAG = "PlaylistActivity";
     private static final int REQ_CODE_ADD_FILE = 1000;
+
+    // Custom scope for our app
+    private static final String[] sScope = new String[]{
+            VKScope.FRIENDS,
+            VKScope.AUDIO,
+            VKScope.NOHTTPS,
+    };
 
     // Playlist's view
     private RecyclerView mRVPlaylist;
@@ -45,6 +70,17 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
 
     ImageButton mBtnPlayPause;
 
+    private boolean fabStatus = false;
+
+    private FloatingActionButton btnAdd;
+    private FloatingActionButton btnFile;
+    private FloatingActionButton btnVK;
+
+    private Animation show_fab_file;
+    private Animation hide_fab_file;
+    private Animation show_fab_vk;
+    private Animation hide_fab_vk;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,11 +89,25 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
         Toolbar toolbar = ((Toolbar) findViewById(R.id.toolbar));
         setSupportActionBar(toolbar);
 
-        // FAB
-        FloatingActionButton btnAdd = ((FloatingActionButton) findViewById(R.id.btnAdd));
+        // FABs
+        btnAdd = ((FloatingActionButton) findViewById(R.id.btnAdd));
         if (btnAdd != null) {
             btnAdd.setOnClickListener(this);
         }
+        btnFile = (FloatingActionButton) findViewById(R.id.btnFile);
+        if (btnFile != null) {
+            btnFile.setOnClickListener(this);
+        }
+        btnVK = (FloatingActionButton) findViewById(R.id.btnVK);
+        if (btnVK != null) {
+            btnVK.setOnClickListener(this);
+        }
+
+        // Animations
+        show_fab_file = AnimationUtils.loadAnimation(getApplication(), R.anim.show_fab_file);
+        hide_fab_file = AnimationUtils.loadAnimation(getApplication(), R.anim.hide_fab_file);
+        show_fab_vk = AnimationUtils.loadAnimation(getApplication(), R.anim.show_fab_vk);
+        hide_fab_vk = AnimationUtils.loadAnimation(getApplication(), R.anim.hide_fab_vk);
 
         // Playlist's recycler view
         mRVPlaylist = ((RecyclerView) findViewById(R.id.rvPlaylist));
@@ -79,29 +129,46 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_toolbar_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.btnVK) {
+            if (VKSdk.isLoggedIn()) {
+                VKSdk.login(this, sScope);
+            } else {
+                VKSdk.logout();
+            }
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btnAdd:
-                btnAddOnClick();
+                if (!fabStatus) {
+                    expandFAB();
+                    fabStatus = true;
+                } else {
+                    hideFAB();
+                    fabStatus = false;
+                }
+                break;
+            case R.id.btnFile:
+                btnAddFromFileOnClick();
+                break;
+            case R.id.btnVK:
+                btnAddFromVKOnClick();
                 break;
             case R.id.btnPlayPause:
                 btnPlayPauseClick();
                 break;
-        }
-    }
-
-    private void btnPlayPauseClick() {
-        PlayerService service = getPlayerService();
-        if (service == null) {
-            return;
-        }
-        PlayerState state = service.getPlayerState();
-        if (state == PlayerState.PLAYING) {
-            service.pause();
-            return;
-        }
-        if (state == PlayerState.PAUSED) {
-            service.play();
         }
     }
 
@@ -169,16 +236,17 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
         }
     }
 
+    //// FIXME: 04.12.16 Drawable resource doesn't exist
     @Override
     public void onStateChanged(PlayerState state) {
         super.onStateChanged(state);
         Log.d(TAG, "onStateChanged: my new state: " + state.name());
         switch (state) {
             case PLAYING:
-                mBtnPlayPause.setImageResource(R.drawable.ic_pause_white_24dp);
+                mBtnPlayPause.setImageResource(android.R.drawable.ic_media_pause);
                 break;
             case PAUSED:
-                mBtnPlayPause.setImageResource(R.drawable.ic_play_arrow_white_24dp);
+                mBtnPlayPause.setImageResource(android.R.drawable.ic_media_play);
                 break;
         }
     }
@@ -198,26 +266,110 @@ public class PlaylistActivity extends PlayerCompatActivity implements View.OnCli
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    private void btnPlayPauseClick() {
+        PlayerService service = getPlayerService();
+        if (service == null) {
+            return;
+        }
+        PlayerState state = service.getPlayerState();
+        if (state == PlayerState.PLAYING) {
+            service.pause();
+            return;
+        }
+        if (state == PlayerState.PAUSED) {
+            service.play();
+        }
+    }
+
     private void performAddingFile(String filename) {
         if (filename == null) {
             return;
         }
         PlayerService service = getPlayerService();
         if (service == null) {
-            Log.d(TAG, "btnAddOnClick: Service is null!");
+            Log.d(TAG, "btnAddFromFileOnClick: Service is null!");
             return;
         }
         Playlist playlist = service.getPlaylist();
         if (playlist == null) {
-            Log.d(TAG, "btnAddOnClick: Playlist is null!");
+            Log.d(TAG, "btnAddFromFileOnClick: Playlist is null!");
             return;
         }
         Log.d(TAG, "performAddingFile: Opening file: " + filename);
         playlist.addTrack(new FileTrack(filename));
     }
 
-    private void btnAddOnClick() {
+    private void btnAddFromFileOnClick() {
         Intent openFileActivityIntent = new Intent(this, OpenFileActivity.class);
         startActivityForResult(openFileActivityIntent, REQ_CODE_ADD_FILE);
+    }
+
+    private void btnAddFromVKOnClick() {
+        DialogFragment dialog = new VKFriendsDialog();
+        dialog.show(getSupportFragmentManager(), "vk_friends_dialog");
+    }
+
+    private void expandFAB() {
+
+        //Floating Action Button File
+        FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) btnFile.getLayoutParams();
+        layoutParams.rightMargin += (int) (btnFile.getWidth() * 1.7);
+        layoutParams.bottomMargin += (int) (btnFile.getHeight() * 0.25);
+        btnFile.setLayoutParams(layoutParams);
+        btnFile.startAnimation(show_fab_file);
+        btnFile.setClickable(true);
+
+        //Floating Action Button VK
+        FrameLayout.LayoutParams layoutParams2 = (FrameLayout.LayoutParams) btnVK.getLayoutParams();
+        layoutParams2.rightMargin += (int) (btnVK.getWidth() * 1.5);
+        layoutParams2.bottomMargin += (int) (btnVK.getHeight() * 1.5);
+        btnVK.setLayoutParams(layoutParams2);
+        btnVK.startAnimation(show_fab_vk);
+        btnVK.setClickable(true);
+    }
+
+
+    private void hideFAB() {
+
+        //Floating Action Button File
+        FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) btnFile.getLayoutParams();
+        layoutParams.rightMargin -= (int) (btnFile.getWidth() * 1.7);
+        layoutParams.bottomMargin -= (int) (btnFile.getHeight() * 0.25);
+        btnFile.setLayoutParams(layoutParams);
+        btnFile.startAnimation(hide_fab_file);
+        btnFile.setClickable(false);
+
+        //Floating Action Button VK
+        FrameLayout.LayoutParams layoutParams2 = (FrameLayout.LayoutParams) btnVK.getLayoutParams();
+        layoutParams2.rightMargin -= (int) (btnVK.getWidth() * 1.5);
+        layoutParams2.bottomMargin -= (int) (btnVK.getHeight() * 1.5);
+        btnVK.setLayoutParams(layoutParams2);
+        btnVK.startAnimation(hide_fab_vk);
+        btnVK.setClickable(false);
+    }
+
+    @Override
+    public void onUserSelected(VKApiUser vkApiUser) {
+        Bundle bundle = new Bundle();
+        bundle.putInt("user_id", vkApiUser.id);
+        DialogFragment dialog = new VKTracksDialog();
+        dialog.setArguments(bundle);
+        dialog.show(getSupportFragmentManager(), "vk_track_dialog");
+    }
+
+    @Override
+    public void onTrackSelected(Track track) {
+        PlayerService service = getPlayerService();
+        if (service == null) {
+            Log.d(TAG, "onTrackSelected: Service is null!");
+            return;
+        }
+        Playlist playlist = service.getPlaylist();
+        if (playlist == null) {
+            Log.d(TAG, "onTrackSelected: Playlist is null!");
+            return;
+        }
+        Log.d(TAG, "onTrackSelected: Loading url of track: " + track.getMetaData().getTitle());
+        playlist.addTrack(track);
     }
 }

@@ -7,8 +7,6 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import java.util.Locale;
-
 import io.github.vkdisco.R;
 import io.github.vkdisco.model.Track;
 import io.github.vkdisco.model.TrackMetaData;
@@ -91,10 +89,10 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             mTVArtist.setText(metaData.getArtist());
             mTVTitle.setText(metaData.getTitle());
 
-            int seconds = (int) (metaData.getDuration() / 1000); // Conversion from ms to seconds
+           /* int seconds = (int) (metaData.getDuration() / 1000); // Conversion from ms to seconds
             int minutes = seconds / 60;
-            seconds %= 60;
-            mTVDuration.setText(String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds));
+            seconds %= 60;*/
+            mTVDuration.setText(metaData.getTime());
 
             mPosition = position;
 
