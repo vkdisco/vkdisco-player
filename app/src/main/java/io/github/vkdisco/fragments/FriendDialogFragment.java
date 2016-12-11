@@ -13,7 +13,6 @@ import android.view.ViewGroup;
 
 import com.vk.sdk.api.VKApi;
 import com.vk.sdk.api.VKApiConst;
-import com.vk.sdk.api.VKError;
 import com.vk.sdk.api.VKParameters;
 import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
@@ -37,6 +36,7 @@ public class FriendDialogFragment extends DialogFragment {
     private List<Friend> mItems;
 
     private OnFriendSelectedListener mListener;
+    private Friend mUser;
 
     public interface OnFriendSelectedListener {
         void onFriendSelected(int id);
@@ -51,6 +51,7 @@ public class FriendDialogFragment extends DialogFragment {
             throw new ClassCastException(
                     activity.toString() + " must implement OnFriendSelected");
         }
+        loadUserInfo();
     }
 
     @Nullable
@@ -66,11 +67,14 @@ public class FriendDialogFragment extends DialogFragment {
 
         mItems = new ArrayList<>();
 
-        VKRequest vkRequest = VKApi.friends().get(VKParameters.from(VKApiConst.FIELDS,
-                "id, first_name, last_name, photo_200"));
+        VKRequest vkRequest = VKApi.users().get(
+                VKParameters.from(
+                        VKApiConst.FIELDS, "id, first_name, last_name, photo_200")
+        );
         vkRequest.executeWithListener(new VKRequest.VKRequestListener() {
             @Override
             public void onComplete(VKResponse response) {
+                super.onComplete(response);
                 super.onComplete(response);
                 VKList<VKApiUser> list = (VKList) response.parsedModel;
 
@@ -90,24 +94,13 @@ public class FriendDialogFragment extends DialogFragment {
 
                 mRecyclerView.setAdapter(mAdapter);
             }
-
-            @Override
-            public void attemptFailed(VKRequest request, int attemptNumber, int totalAttempts) {
-                super.attemptFailed(request, attemptNumber, totalAttempts);
-            }
-
-            @Override
-            public void onError(VKError error) {
-                super.onError(error);
-            }
-
-            @Override
-            public void onProgress(VKRequest.VKProgressType progressType, long bytesLoaded, long bytesTotal) {
-                super.onProgress(progressType, bytesLoaded, bytesTotal);
-            }
         });
 
         return v;
+    }
+
+    private void loadUserInfo() {
+
     }
 
     @Override
