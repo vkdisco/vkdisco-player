@@ -44,11 +44,11 @@ public class VKFriendsDialog extends DialogFragment {
     private EditText mSearch;
     private ListView mListView;
     private View mHeader;
-    private OnUserSelectedListener mListener;
 
     private VKApiUser mUser;
-    private List<VKApiUser> mData;
+    private List<VKApiUser> mList;
     private VKUserAdapter mAdapter;
+    private OnUserSelectedListener mListener;
 
     @Override
     public void onAttach(Context context) {
@@ -64,7 +64,7 @@ public class VKFriendsDialog extends DialogFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mData = new ArrayList<>();
+        mList = new ArrayList<>();
         loadUserInfo();
         loadListOfFriends();
     }
@@ -86,8 +86,7 @@ public class VKFriendsDialog extends DialogFragment {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                String text = charSequence.toString().toLowerCase();
-                mAdapter.filter(text);
+                mAdapter.getFilter().filter(charSequence);
             }
 
             @Override
@@ -146,9 +145,9 @@ public class VKFriendsDialog extends DialogFragment {
 
                 VKList<VKApiUser> list = (VKList) response.parsedModel;
                 for (VKApiUser user : list) {
-                    mData.add(user);
+                    mList.add(user);
                 }
-                mAdapter = new VKUserAdapter(getContext(), mData, new OnUserClickListener() {
+                mAdapter = new VKUserAdapter(getContext(), mList, new OnUserClickListener() {
                     @Override
                     public void onUserClick(VKApiUser vkApiUser) {
                         mListener.onUserSelected(vkApiUser);

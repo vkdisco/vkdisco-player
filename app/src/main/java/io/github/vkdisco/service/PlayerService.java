@@ -32,7 +32,7 @@ public class PlayerService extends Service implements OnTrackSwitchListener,
     public static final String EXTRA_STATE = "io.github.vkdisco.PlayerService.EXTRA.STATE";
 
     public static final String BROADCAST_ACTION_EVENT = "io.github.vkdisco.PlayerService.BROADCAST.EVENT";
-    
+
     public static final String EVENT_STATE_CHANGED = "io.github.vkdisco.PlayerService.EVENT.STATE_CHANGED";
     public static final String EVENT_PLAYLIST_CHANGED = "io.github.vkdisco.PlayerService.EVENT.PLAYLIST_CHANGED";
     public static final String EVENT_TRACK_SWITCHED = "io.github.vkdisco.PlayerService.EVENT.TRACK_SWITCHED";

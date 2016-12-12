@@ -41,9 +41,9 @@ import io.github.vkdisco.model.VKTrack;
 
 public class VKTracksDialog extends DialogFragment {
     private RecyclerView mRecyclerView;
-
     private EditText mSearch;
-    private List<Track> mData;
+
+    private List<Track> mList;
     private TrackAdapter mAdapter;
     private OnTrackSelectedListener mListener;
 
@@ -64,7 +64,7 @@ public class VKTracksDialog extends DialogFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         userID = getArguments().getInt("user_id");
-        mData = new ArrayList<>();
+        mList = new ArrayList<>();
         loadListOfVKTracks();
     }
 
@@ -89,7 +89,7 @@ public class VKTracksDialog extends DialogFragment {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
+                mAdapter.getFilter().filter(charSequence);
             }
 
             @Override
@@ -125,12 +125,12 @@ public class VKTracksDialog extends DialogFragment {
                 VKList<VKApiAudio> list = (VKList) response.parsedModel;
 
                 for (VKApiAudio audio : list) {
-                    mData.add(
+                    mList.add(
                             new VKTrack(audio)
                     );
                 }
 
-                mAdapter = new TrackAdapter(mData, new OnTrackClickListener() {
+                mAdapter = new TrackAdapter(mList, new OnTrackClickListener() {
                     @Override
                     public void onTrackClick(Track track) {
                         mListener.onTrackSelected(track);
