@@ -138,7 +138,7 @@ public class PlaylistActivity extends PlayerCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.btnVK) {
-            if (VKSdk.isLoggedIn()) {
+            if (!VKSdk.isLoggedIn()) {
                 VKSdk.login(this, sScope);
             } else {
                 VKSdk.logout();
