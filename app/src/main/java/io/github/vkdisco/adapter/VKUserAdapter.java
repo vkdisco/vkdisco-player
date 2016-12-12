@@ -5,12 +5,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 import com.vk.sdk.api.model.VKApiUser;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.github.vkdisco.R;
@@ -20,30 +23,31 @@ import io.github.vkdisco.adapter.interfaces.OnUserClickListener;
  * Created by tkaczenko on 21.11.16.
  */
 
-public class VKUserAdapter extends BaseAdapter {
+public class VKUserAdapter extends BaseAdapter implements Filterable {
     private Context mContext;
-    private List<VKApiUser> mData;
+    private List<VKApiUser> mList;
+    private List<VKApiUser> mOriginalValues;
     private OnUserClickListener mListener;
 
-    public VKUserAdapter(Context mContext, List<VKApiUser> mData, OnUserClickListener mListener) {
+    public VKUserAdapter(Context mContext, List<VKApiUser> list, OnUserClickListener listener) {
         this.mContext = mContext;
-        this.mData = mData;
-        this.mListener = mListener;
+        this.mList = list;
+        this.mListener = listener;
     }
 
     @Override
     public int getCount() {
-        return mData.size();
+        return mList.size();
     }
 
     @Override
     public VKApiUser getItem(int i) {
-        return mData.get(i);
+        return mList.get(i);
     }
 
     @Override
     public long getItemId(int i) {
-        return mData.get(i).id;
+        return mList.get(i).id;
     }
 
     @Override
@@ -70,5 +74,46 @@ public class VKUserAdapter extends BaseAdapter {
         });
 
         return v;
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                FilterResults results = new FilterResults();
+                List<VKApiUser> filteredList = new ArrayList<>();
+
+                if (mOriginalValues == null) {
+                    mOriginalValues = new ArrayList<>(mList);
+                }
+
+                if (charSequence == null || charSequence.length() == 0) {
+                    results.count = mOriginalValues.size();
+                    results.values = mOriginalValues;
+                } else {
+                    String constraint = charSequence.toString().toLowerCase();
+                    for (VKApiUser track : mOriginalValues) {
+                        String lastName = track.last_name;
+                        String firstName = track.first_name;
+                        if (lastName != null && lastName.toLowerCase().contains(constraint)) {
+                            filteredList.add(track);
+                        } else if (firstName != null && firstName.toLowerCase().contains(constraint)) {
+                            filteredList.add(track);
+                        }
+                    }
+                    results.count = filteredList.size();
+                    results.values = filteredList;
+                }
+                return results;
+            }
+
+            @Override
+            @SuppressWarnings("unchecked")
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                mList = (List<VKApiUser>) filterResults.values;
+                notifyDataSetChanged();
+            }
+        };
     }
 }

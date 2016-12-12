@@ -1,7 +1,5 @@
 package io.github.vkdisco.player;
 
-import android.os.Parcelable;
-
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 

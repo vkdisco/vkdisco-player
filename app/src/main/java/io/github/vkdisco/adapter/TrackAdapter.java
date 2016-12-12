@@ -4,8 +4,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.github.vkdisco.R;
@@ -18,13 +21,14 @@ import io.github.vkdisco.model.TrackMetaData;
  */
 
 public class TrackAdapter extends
-        RecyclerView.Adapter<TrackAdapter.TrackViewHolder> {
-    private List<Track> mData;
+        RecyclerView.Adapter<TrackAdapter.TrackViewHolder> implements Filterable {
+    private List<Track> mList;
+    private List<Track> mOriginalValues;
     private OnTrackClickListener mListener;
 
-    public TrackAdapter(List<Track> mData, OnTrackClickListener mListener) {
-        this.mData = mData;
-        this.mListener = mListener;
+    public TrackAdapter(List<Track> list, OnTrackClickListener listener) {
+        this.mList = list;
+        this.mListener = listener;
     }
 
     @Override
@@ -37,12 +41,60 @@ public class TrackAdapter extends
 
     @Override
     public void onBindViewHolder(TrackViewHolder holder, int position) {
-        holder.bind(mData.get(position), mListener);
+        holder.bind(mList.get(position), mListener);
     }
 
     @Override
     public int getItemCount() {
-        return mData.size();
+        return mList.size();
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                FilterResults results = new FilterResults();
+                List<Track> filteredList = new ArrayList<>();
+
+                if (mOriginalValues == null) {
+                    mOriginalValues = new ArrayList<>(mList);
+                }
+
+                if (charSequence == null || charSequence.length() == 0) {
+                    results.count = mOriginalValues.size();
+                    results.values = mOriginalValues;
+                } else {
+                    String constraint = charSequence.toString().toLowerCase();
+                    for (Track track : mOriginalValues) {
+                        TrackMetaData metaData = track.getMetaData();
+                        String title = metaData.getTitle();
+                        String artist = metaData.getArtist();
+                        String album = metaData.getAlbum();
+                        String year = metaData.getYear();
+                        if (title != null && title.toLowerCase().contains(constraint)) {
+                            filteredList.add(track);
+                        } else if (artist != null && artist.toLowerCase().contains(constraint)) {
+                            filteredList.add(track);
+                        } else if (album != null && album.toLowerCase().contains(constraint)) {
+                            filteredList.add(track);
+                        } else if (year != null && year.toLowerCase().contains(constraint)) {
+                            filteredList.add(track);
+                        }
+                    }
+                    results.count = filteredList.size();
+                    results.values = filteredList;
+                }
+                return results;
+            }
+
+            @Override
+            @SuppressWarnings("unchecked")
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                mList = (List<Track>) filterResults.values;
+                notifyDataSetChanged();
+            }
+        };
     }
 
     class TrackViewHolder extends RecyclerView.ViewHolder {

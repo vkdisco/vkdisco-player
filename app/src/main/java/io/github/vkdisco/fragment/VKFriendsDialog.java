@@ -7,15 +7,17 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
-import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.api.VKApi;
 import com.vk.sdk.api.VKApiConst;
 import com.vk.sdk.api.VKParameters;
@@ -39,13 +41,14 @@ import io.github.vkdisco.fragment.interfaces.OnUserSelectedListener;
 public class VKFriendsDialog extends DialogFragment {
     private static final String requestParams = "id, first_name, last_name, photo_200";
 
+    private EditText mSearch;
     private ListView mListView;
     private View mHeader;
-    private OnUserSelectedListener mListener;
 
     private VKApiUser mUser;
-    private List<VKApiUser> mData;
+    private List<VKApiUser> mList;
     private VKUserAdapter mAdapter;
+    private OnUserSelectedListener mListener;
 
     @Override
     public void onAttach(Context context) {
@@ -61,7 +64,7 @@ public class VKFriendsDialog extends DialogFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mData = new ArrayList<>();
+        mList = new ArrayList<>();
         loadUserInfo();
         loadListOfFriends();
     }
@@ -74,6 +77,23 @@ public class VKFriendsDialog extends DialogFragment {
 
         View v = inflater.inflate(R.layout.dialog_choose_user, null);
         mListView = (ListView) v.findViewById(R.id.lvUsers);
+        mSearch = (EditText) v.findViewById(R.id.search);
+        mSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                mAdapter.getFilter().filter(charSequence);
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
 
         builder.setView(v)
                 .setTitle(R.string.title_vk_friends_dialog);
@@ -95,7 +115,6 @@ public class VKFriendsDialog extends DialogFragment {
     private void loadUserInfo() {
         VKRequest vkRequest = VKApi.users().get(
                 VKParameters.from(
-                        VKApiConst.USER_ID, VKAccessToken.USER_ID,
                         VKApiConst.FIELDS, requestParams
                 )
         );
@@ -126,9 +145,9 @@ public class VKFriendsDialog extends DialogFragment {
 
                 VKList<VKApiUser> list = (VKList) response.parsedModel;
                 for (VKApiUser user : list) {
-                    mData.add(user);
+                    mList.add(user);
                 }
-                mAdapter = new VKUserAdapter(getContext(), mData, new OnUserClickListener() {
+                mAdapter = new VKUserAdapter(getContext(), mList, new OnUserClickListener() {
                     @Override
                     public void onUserClick(VKApiUser vkApiUser) {
                         mListener.onUserSelected(vkApiUser);

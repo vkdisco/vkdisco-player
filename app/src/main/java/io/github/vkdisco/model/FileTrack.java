@@ -7,8 +7,6 @@ import android.util.Log;
 
 import com.un4seen.bass.BASS;
 
-import java.io.File;
-
 /**
  * Created by tkaczenko on 11.11.16.
  */

@@ -7,13 +7,14 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
+import android.widget.EditText;
 
 import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.api.VKApi;
@@ -22,7 +23,6 @@ import com.vk.sdk.api.VKParameters;
 import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
 import com.vk.sdk.api.model.VKApiAudio;
-import com.vk.sdk.api.model.VKApiUser;
 import com.vk.sdk.api.model.VKList;
 
 import java.util.ArrayList;
@@ -30,9 +30,7 @@ import java.util.List;
 
 import io.github.vkdisco.R;
 import io.github.vkdisco.adapter.TrackAdapter;
-import io.github.vkdisco.adapter.VKUserAdapter;
 import io.github.vkdisco.adapter.interfaces.OnTrackClickListener;
-import io.github.vkdisco.adapter.interfaces.OnUserClickListener;
 import io.github.vkdisco.fragment.interfaces.OnTrackSelectedListener;
 import io.github.vkdisco.model.Track;
 import io.github.vkdisco.model.VKTrack;
@@ -43,8 +41,9 @@ import io.github.vkdisco.model.VKTrack;
 
 public class VKTracksDialog extends DialogFragment {
     private RecyclerView mRecyclerView;
+    private EditText mSearch;
 
-    private List<Track> mData;
+    private List<Track> mList;
     private TrackAdapter mAdapter;
     private OnTrackSelectedListener mListener;
 
@@ -65,7 +64,7 @@ public class VKTracksDialog extends DialogFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         userID = getArguments().getInt("user_id");
-        mData = new ArrayList<>();
+        mList = new ArrayList<>();
         loadListOfVKTracks();
     }
 
@@ -80,6 +79,24 @@ public class VKTracksDialog extends DialogFragment {
 
         RecyclerView.LayoutManager manager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(manager);
+
+        mSearch = (EditText) v.findViewById(R.id.search);
+        mSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                mAdapter.getFilter().filter(charSequence);
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
 
         builder.setView(v)
                 .setTitle(R.string.title_vk_tracks_dialog);
@@ -108,12 +125,12 @@ public class VKTracksDialog extends DialogFragment {
                 VKList<VKApiAudio> list = (VKList) response.parsedModel;
 
                 for (VKApiAudio audio : list) {
-                    mData.add(
+                    mList.add(
                             new VKTrack(audio)
                     );
                 }
 
-                mAdapter = new TrackAdapter(mData, new OnTrackClickListener() {
+                mAdapter = new TrackAdapter(mList, new OnTrackClickListener() {
                     @Override
                     public void onTrackClick(Track track) {
                         mListener.onTrackSelected(track);
