@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import com.vk.sdk.api.model.VKApiUser;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.github.vkdisco.R;
@@ -25,10 +26,14 @@ public class VKUserAdapter extends BaseAdapter {
     private List<VKApiUser> mData;
     private OnUserClickListener mListener;
 
+    private ArrayList<VKApiUser> filteredList;
+
     public VKUserAdapter(Context mContext, List<VKApiUser> mData, OnUserClickListener mListener) {
         this.mContext = mContext;
         this.mData = mData;
         this.mListener = mListener;
+        this.filteredList = new ArrayList<>();
+        this.filteredList.addAll(mData);
     }
 
     @Override
@@ -70,5 +75,20 @@ public class VKUserAdapter extends BaseAdapter {
         });
 
         return v;
+    }
+
+    public void filter(String constraint) {
+        constraint = constraint.toLowerCase();
+        if (constraint.length() != 0) {
+            mData.clear();
+            for (VKApiUser user : filteredList) {
+                if (user.last_name.toLowerCase().contains(constraint)) {
+                    mData.add(user);
+                } else if (user.first_name.toLowerCase().contains(constraint)) {
+                    mData.add(user);
+                }
+            }
+            notifyDataSetChanged();
+        }
     }
 }
