@@ -16,7 +16,6 @@ import com.un4seen.bass.BASS;
 import java.nio.ByteBuffer;
 
 import io.github.vkdisco.activity.PlayerCompatActivity;
-import io.github.vkdisco.filebrowser.OpenFileActivity;
 
 public class SampleActivity extends PlayerCompatActivity
         implements View.OnClickListener, SeekBar.OnSeekBarChangeListener {
@@ -49,8 +48,6 @@ public class SampleActivity extends PlayerCompatActivity
             switch (requestCode) {
                 case RC_LOAD_FILE: //If user chosen file to open
                     if (data != null) {
-                        String filename = data.getStringExtra(OpenFileActivity.EXTRA_FILENAME);
-                        loadFileByName(filename);
                     }
                     break;
             }
@@ -114,8 +111,6 @@ public class SampleActivity extends PlayerCompatActivity
             //(if it opened)
             BASS.BASS_StreamFree(mChannelHandle);
         }
-        Intent intent = new Intent(this, OpenFileActivity.class);
-        startActivityForResult(intent, RC_LOAD_FILE);
     }
 
     private void onLoadUrl() {

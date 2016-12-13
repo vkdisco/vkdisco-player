@@ -32,7 +32,6 @@ import java.io.File;
 import io.github.vkdisco.R;
 import io.github.vkdisco.adapter.PlaylistAdapter;
 import io.github.vkdisco.adapter.PlaylistAdapter.OnPlaylistItemClickListener;
-import io.github.vkdisco.filebrowser.OpenFileActivity;
 import io.github.vkdisco.fragment.FileDialog;
 import io.github.vkdisco.fragment.VKFriendsDialog;
 import io.github.vkdisco.fragment.VKTracksDialog;
@@ -53,7 +52,6 @@ public class PlaylistActivity extends PlayerCompatActivity
         implements OnClickListener, OnPlaylistItemClickListener, OnUserSelectedListener,
         OnTrackSelectedListener, FileDialog.OnFileSelectedListener {
     private static final String TAG = "PlaylistActivity";
-    private static final int REQ_CODE_ADD_FILE = 1000;
 
     // Custom scope for our app
     private static final String[] sScope = new String[]{
@@ -269,21 +267,6 @@ public class PlaylistActivity extends PlayerCompatActivity
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if ((requestCode == REQ_CODE_ADD_FILE) && (resultCode == RESULT_OK)) {
-            if (data == null) {
-                return;
-            }
-            if (!data.hasExtra(OpenFileActivity.EXTRA_FILENAME)) {
-                return;
-            }
-            String filename = data.getStringExtra(OpenFileActivity.EXTRA_FILENAME);
-            performAddingFile(filename);
-        }
-        super.onActivityResult(requestCode, resultCode, data);
-    }
-
     private void btnPlayPauseClick() {
         PlayerService service = getPlayerService();
         if (service == null) {
@@ -318,8 +301,6 @@ public class PlaylistActivity extends PlayerCompatActivity
     }
 
     private void btnAddFromFileOnClick() {
-//        Intent openFileActivityIntent = new Intent(this, OpenFileActivity.class);
-//        startActivityForResult(openFileActivityIntent, REQ_CODE_ADD_FILE);
         FileDialog fileDialog = new FileDialog();
         fileDialog.setListener(this);
         fileDialog.setSelectMode(FileDialog.SelectMode.MULTIPLE_FILE);
