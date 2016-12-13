@@ -19,6 +19,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -88,6 +89,12 @@ public class PlaylistActivity extends PlayerCompatActivity
         // Toolbar
         Toolbar toolbar = ((Toolbar) findViewById(R.id.toolbar));
         setSupportActionBar(toolbar);
+
+        // Player bar
+        LinearLayout llPlayerBar = ((LinearLayout) findViewById(R.id.llPlayerBar));
+        if (llPlayerBar != null) {
+            llPlayerBar.setOnClickListener(this);
+        }
 
         // FABs
         btnAdd = ((FloatingActionButton) findViewById(R.id.btnAdd));

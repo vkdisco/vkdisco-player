@@ -15,4 +15,7 @@
     <string name="text_label_no_metadata">No metadata</string>
     <string name="action_bar_btn_vk_title">VK</string>
     <string name="title_vk_tracks_dialog">VK tracks</string>
+    <string name="text_placeholder_title">Title</string>
+    <string name="text_placeholder_artist">Artist</string>
+    <string name="text_placeholder_time">--:--</string>
 </resources>

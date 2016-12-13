@@ -88,7 +88,7 @@ public class TrackMetaData {
     }
 
     public String getTime() {
-        Long minutes = (duration % 3600) / 60;
+        Long minutes = ((duration / 1000) % 3600) / 60;
         Long seconds = duration % 60;
         return String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
     }
