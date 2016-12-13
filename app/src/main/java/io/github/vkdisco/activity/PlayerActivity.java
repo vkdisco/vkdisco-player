@@ -33,6 +33,7 @@ public class PlayerActivity extends PlayerCompatActivity implements
     private SeekBar mSBTrackProgress;
     private TextView mTVFullTime;
     private TextView mTVCurrentTime;
+    private boolean mSeekingNow = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -73,6 +74,7 @@ public class PlayerActivity extends PlayerCompatActivity implements
         mSBTrackProgress = ((SeekBar) findViewById(R.id.sbTrackProgress));
         if (mSBTrackProgress != null) {
             mSBTrackProgress.setMax(MAX_PROGRESS);
+            mSBTrackProgress.setOnSeekBarChangeListener(this);
         }
         mTVCurrentTime = ((TextView) findViewById(R.id.tvCurrentTime));
         mTVFullTime = ((TextView) findViewById(R.id.tvFullTime));
@@ -87,11 +89,13 @@ public class PlayerActivity extends PlayerCompatActivity implements
     @Override
     public void onTrackPositionUpdate(double position) {
         super.onTrackPositionUpdate(position);
-        mSBTrackProgress.setProgress((int) (position * MAX_PROGRESS));
         long positionS = (long) (getPlayerService().getTrackLengthSeconds() * position);
         String positionString = String.format(Locale.getDefault(), "%02d:%02d",
                 positionS / 60, positionS % 60);
         mTVCurrentTime.setText(positionString);
+        if (!mSeekingNow) {
+            mSBTrackProgress.setProgress((int) (position * MAX_PROGRESS));
+        }
     }
 
     @Override
@@ -189,13 +193,16 @@ public class PlayerActivity extends PlayerCompatActivity implements
         if (!fromUser) {
             return;
         }
+        getPlayerService().setPosition(1.0 * progress / MAX_PROGRESS);
     }
 
     @Override
     public void onStartTrackingTouch(SeekBar seekBar) {
+        mSeekingNow = true;
     }
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
+        mSeekingNow = false;
     }
 }

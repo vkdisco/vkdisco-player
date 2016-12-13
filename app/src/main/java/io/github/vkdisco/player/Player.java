@@ -204,7 +204,7 @@ public class Player implements OnTrackEndListener {
 
     @Override
     public void onTrackEnd() {
-        nextTrack(); // TODO: 17.11.2016 Delay 20ms
+        nextTrack();
     }
 
     private void setState(PlayerState state) {
@@ -215,6 +215,10 @@ public class Player implements OnTrackEndListener {
     }
 
     private void switchTrack(Track track) {
+        boolean trackWasPlaying = false;
+        if (state == PlayerState.PLAYING) {
+            trackWasPlaying = true;
+        }
         free();
         if (track == null) {
             Log.d(TAG, "switchTrack: track is null!");
@@ -231,6 +235,9 @@ public class Player implements OnTrackEndListener {
                 BASS.BASS_SYNC_END, 0, trackEndNotifier, null);
         if (trackSwitchListener != null) {
             trackSwitchListener.onTrackSwitch();
+        }
+        if (trackWasPlaying) {
+            play();
         }
     }
 
