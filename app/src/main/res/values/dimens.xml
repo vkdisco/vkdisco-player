@@ -6,4 +6,7 @@
     <dimen name="list_item_file_image_size">50dp</dimen>
     <dimen name="list_item_file_image_margin">5dp</dimen>
     <dimen name="list_item_file_text_size">20sp</dimen>
+    <dimen name="button_player_normal">60dp</dimen>
+    <dimen name="button_player_big">80dp</dimen>
+    <dimen name="player_activity_blocks_margins">20dp</dimen>
 </resources>

@@ -18,4 +18,5 @@
     <string name="text_placeholder_title">Title</string>
     <string name="text_placeholder_artist">Artist</string>
     <string name="text_placeholder_time">--:--</string>
+    <string name="text_placeholder_album">Unknown album</string>
 </resources>
