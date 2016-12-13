@@ -27,10 +27,13 @@ import com.vk.sdk.VKScope;
 import com.vk.sdk.VKSdk;
 import com.vk.sdk.api.model.VKApiUser;
 
+import java.io.File;
+
 import io.github.vkdisco.R;
 import io.github.vkdisco.adapter.PlaylistAdapter;
 import io.github.vkdisco.adapter.PlaylistAdapter.OnPlaylistItemClickListener;
 import io.github.vkdisco.filebrowser.OpenFileActivity;
+import io.github.vkdisco.fragment.FileDialog;
 import io.github.vkdisco.fragment.VKFriendsDialog;
 import io.github.vkdisco.fragment.VKTracksDialog;
 import io.github.vkdisco.fragment.interfaces.OnTrackSelectedListener;
@@ -48,7 +51,7 @@ import io.github.vkdisco.service.PlayerService;
 
 public class PlaylistActivity extends PlayerCompatActivity
         implements OnClickListener, OnPlaylistItemClickListener, OnUserSelectedListener,
-        OnTrackSelectedListener {
+        OnTrackSelectedListener, FileDialog.OnFileSelectedListener {
     private static final String TAG = "PlaylistActivity";
     private static final int REQ_CODE_ADD_FILE = 1000;
 
@@ -315,8 +318,13 @@ public class PlaylistActivity extends PlayerCompatActivity
     }
 
     private void btnAddFromFileOnClick() {
-        Intent openFileActivityIntent = new Intent(this, OpenFileActivity.class);
-        startActivityForResult(openFileActivityIntent, REQ_CODE_ADD_FILE);
+//        Intent openFileActivityIntent = new Intent(this, OpenFileActivity.class);
+//        startActivityForResult(openFileActivityIntent, REQ_CODE_ADD_FILE);
+        FileDialog fileDialog = new FileDialog();
+        fileDialog.setListener(this);
+        fileDialog.setSelectMode(FileDialog.SelectMode.MULTIPLE_FILE);
+        fileDialog.setStartFile(new File("/mnt/"));
+        fileDialog.show(getSupportFragmentManager(), "FileDialog");
     }
 
     private void btnAddFromVKOnClick() {
@@ -386,5 +394,14 @@ public class PlaylistActivity extends PlayerCompatActivity
         }
         Log.d(TAG, "onTrackSelected: Loading url of track: " + track.getMetaData().getTitle());
         playlist.addTrack(track);
+    }
+
+    @Override
+    public void onFileSelected(File file) {
+        if (file == null) {
+            Log.d(TAG, "onFileSelected: Selected file is null!");
+            return;
+        }
+        performAddingFile(file.getAbsolutePath());
     }
 }
