@@ -18,4 +18,6 @@
     <string name="text_placeholder_title">Title</string>
     <string name="text_placeholder_artist">Artist</string>
     <string name="text_placeholder_time">--:--</string>
+    <string name="text_placeholder_album">Unknown album</string>
+    <string name="text_label_choose_file">Choose file(s)</string>
 </resources>

@@ -16,7 +16,7 @@
         android:layout_height="wrap_content"
         style="?android:attr/buttonBarStyle">
         <Button
-            android:id="@+id/btnPlay"
+            android:id="@+id/btnPlayPause"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
