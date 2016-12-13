@@ -23,6 +23,7 @@
         android:progressDrawable="@drawable/progress_bar_track" />
 
     <LinearLayout
+        android:id="@+id/llPlayerBar"
         android:layout_width="match_parent"
         android:layout_height="64dp"
         android:layout_gravity="center_vertical"

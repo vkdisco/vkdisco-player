@@ -82,7 +82,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             if (metaData == null) {
                 mTVArtist.setText(R.string.text_label_no_metadata);
                 mTVTitle.setText(R.string.text_label_no_metadata);
-                mTVDuration.setText("--:--");
+                mTVDuration.setText(R.string.text_placeholder_time);
                 return;
             }
 
