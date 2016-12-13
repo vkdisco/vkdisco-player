@@ -16,7 +16,7 @@
         android:weightSum="1" />
 
     <ImageView
-        android:id="@+id/playerAlbumArt"
+        android:id="@+id/ivAlbumArt"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_margin="@dimen/player_activity_blocks_margins"
@@ -32,7 +32,7 @@
         android:layout_marginBottom="@dimen/player_activity_blocks_margins">
 
         <TextView
-            android:id="@+id/playerAlbumTitle"
+            android:id="@+id/tvAlbum"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/text_placeholder_album"
@@ -57,7 +57,7 @@
                 app:srcCompat="@drawable/ic_shuffle" />
 
             <ImageButton
-                android:id="@+id/btnSkipPrevious"
+                android:id="@+id/btnPrevious"
                 android:layout_width="@dimen/button_player_normal"
                 android:layout_height="@dimen/button_player_normal"
                 android:layout_margin="2dp"
@@ -66,7 +66,7 @@
                 app:srcCompat="@drawable/ic_skip_previous" />
 
             <ImageButton
-                android:id="@+id/btnPlayerPlayPause"
+                android:id="@+id/btnPlayPause"
                 android:layout_width="@dimen/button_player_big"
                 android:layout_height="@dimen/button_player_big"
                 android:layout_margin="2dp"
@@ -75,7 +75,7 @@
                 app:srcCompat="@drawable/ic_play_circle_filled" />
 
             <ImageButton
-                android:id="@+id/btnSkipNext"
+                android:id="@+id/btnNext"
                 android:layout_width="@dimen/button_player_normal"
                 android:layout_height="@dimen/button_player_normal"
                 android:layout_margin="2dp"
@@ -101,7 +101,7 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/playerTrackCurrentTime"
+                android:id="@+id/tvCurrentTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingEnd="10dp"
@@ -113,13 +113,13 @@
                 android:textSize="18sp" />
 
             <SeekBar
-                android:id="@+id/playerTrackProgress"
+                android:id="@+id/sbTrackProgress"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1" />
 
             <TextView
-                android:id="@+id/playerTrackFullTime"
+                android:id="@+id/tvFullTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingEnd="10dp"
@@ -132,7 +132,7 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/playerTrackTitle"
+            android:id="@+id/tvTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/text_placeholder_title"
@@ -141,7 +141,7 @@
             android:textSize="20sp" />
 
         <TextView
-            android:id="@+id/playerArtistTitle"
+            android:id="@+id/tvArtist"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/text_placeholder_artist"

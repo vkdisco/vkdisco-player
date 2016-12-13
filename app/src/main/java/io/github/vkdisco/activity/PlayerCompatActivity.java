@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import io.github.vkdisco.player.PlayerState;
 import io.github.vkdisco.service.PlayerService;
@@ -21,6 +22,7 @@ import io.github.vkdisco.service.PlayerService;
  */
 
 public class PlayerCompatActivity extends AppCompatActivity {
+    private static final String TAG = "PlayerCompatActivity";
     private static final int DEFAULT_UPDATE_FREQUENCY = 4; //Hz
     private ServiceConnection mPlayerServiceConnection;
     private BroadcastReceiver mPlayerBroadcastReceiver;
@@ -40,6 +42,7 @@ public class PlayerCompatActivity extends AppCompatActivity {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 mPlayerService = ((PlayerService.PlayerBinder) service).getService();
+                onServiceBound(mPlayerService);
             }
 
             @Override
@@ -111,6 +114,9 @@ public class PlayerCompatActivity extends AppCompatActivity {
     }
 
     public void onPlaylistChanged() {
+    }
+
+    public void onServiceBound(PlayerService playerService) {
     }
 
     public void onTrackPositionUpdate(double position) {

@@ -67,7 +67,7 @@ public class SampleActivity extends PlayerCompatActivity
             case R.id.btnLoadURL:
                 onLoadUrl();
                 break;
-            case R.id.btnPlay:
+            case R.id.btnPlayPause:
                 onTrackPlay();
                 break;
             case R.id.btnPause:
@@ -219,7 +219,7 @@ public class SampleActivity extends PlayerCompatActivity
         if (btnLoadFile != null) {
             btnLoadFile.setOnClickListener(this);
         }
-        Button btnPlay = ((Button) findViewById(R.id.btnPlay));
+        Button btnPlay = ((Button) findViewById(R.id.btnPlayPause));
         if (btnPlay != null) {
             btnPlay.setOnClickListener(this);
         }
@@ -314,7 +314,7 @@ public class SampleActivity extends PlayerCompatActivity
     }
 
     private void playControlsEnabled(boolean enabled) { //Enabling or disabling player controls
-        Button btnPlay = ((Button) findViewById(R.id.btnPlay));
+        Button btnPlay = ((Button) findViewById(R.id.btnPlayPause));
         if (btnPlay != null) {
             btnPlay.setEnabled(enabled);
         }

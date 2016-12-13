@@ -26,6 +26,10 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".activity.PlayerActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name=".filebrowser.OpenFileActivity"
             android:screenOrientation="portrait" />
         <activity

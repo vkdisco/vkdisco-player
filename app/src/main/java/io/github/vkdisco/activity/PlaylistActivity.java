@@ -158,6 +158,9 @@ public class PlaylistActivity extends PlayerCompatActivity
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            case R.id.llPlayerBar:
+                playerBarClick();
+                break;
             case R.id.btnAdd:
                 if (!fabStatus) {
                     expandFAB();
@@ -177,6 +180,11 @@ public class PlaylistActivity extends PlayerCompatActivity
                 btnPlayPauseClick();
                 break;
         }
+    }
+
+    private void playerBarClick() {
+        Intent playerActivityIntent = new Intent(this, PlayerActivity.class);
+        startActivity(playerActivityIntent);
     }
 
     @Override
