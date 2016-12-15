@@ -1,6 +1,7 @@
 package io.github.vkdisco.service;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Environment;
@@ -13,11 +14,17 @@ import com.un4seen.bass.BASS;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.Writer;
 
 import io.github.vkdisco.model.TrackMetaData;
 import io.github.vkdisco.player.Player;
@@ -35,14 +42,15 @@ import io.github.vkdisco.player.interfaces.OnTrackSwitchListener;
 
 public class PlayerService extends Service implements OnTrackSwitchListener,
         OnPlayerStateChangedListener, OnPlaylistChangedListener {
-    private static final String TAG = "PlayerService";
+    private static final String DEFAULT_PLAYLIST_FILENAME = "default.vkdpls";
 
+    private static final String TAG = "PlayerService";
     public static final String EXTRA_WAKEUP = "io.github.vkdisco.PlayerService.EXTRA.WAKEUP";
     public static final String EXTRA_EVENT = "io.github.vkdisco.PlayerService.EXTRA.EVENT";
+
     public static final String EXTRA_STATE = "io.github.vkdisco.PlayerService.EXTRA.STATE";
 
     public static final String BROADCAST_ACTION_EVENT = "io.github.vkdisco.PlayerService.BROADCAST.EVENT";
-
     public static final String EVENT_STATE_CHANGED = "io.github.vkdisco.PlayerService.EVENT.STATE_CHANGED";
     public static final String EVENT_PLAYLIST_CHANGED = "io.github.vkdisco.PlayerService.EVENT.PLAYLIST_CHANGED";
     public static final String EVENT_TRACK_SWITCHED = "io.github.vkdisco.PlayerService.EVENT.TRACK_SWITCHED";
@@ -58,15 +66,26 @@ public class PlayerService extends Service implements OnTrackSwitchListener,
         player = new Player();
         player.setStateChangedListener(this);
         player.setTrackSwitchListener(this);
-        playlist = new Playlist(this); // STUB!
-        // TODO: 17.11.2016 Load default playlist (w loadPlaylist())
+        File playlistFile = new File(getFilesDir(), DEFAULT_PLAYLIST_FILENAME);
+        Log.d(TAG, "onCreate: default playlist: " + playlistFile.getAbsolutePath());
+        if (!loadPlaylist(playlistFile.getAbsolutePath())) {
+            Log.d(TAG, "onCreate: loading default playlist is failed");
+        }
+        if (playlist == null) {
+            Log.d(TAG, "onCreate: playlist is null");
+            playlist = new Playlist(this);
+        }
         player.setPlaylist(playlist);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        // TODO: 17.11.2016 Save default playlist (w savePlaylist())
+        Log.d(TAG, "onDestroy: called");
+        File playlistFile = new File(getFilesDir(), DEFAULT_PLAYLIST_FILENAME);
+        if (!savePlaylist(playlistFile.getAbsolutePath())) {
+            Log.d(TAG, "onDestroy: saving default playlist is failed");
+        }
         player.free();
         BASS.BASS_Free();
     }
@@ -74,7 +93,14 @@ public class PlayerService extends Service implements OnTrackSwitchListener,
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
+        Log.d(TAG, "onBind: called");
         return new PlayerBinder();
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        Log.d(TAG, "onUnbind: called");
+        return super.onUnbind(intent);
     }
 
     //Own methods
@@ -143,19 +169,65 @@ public class PlayerService extends Service implements OnTrackSwitchListener,
         if (!path.endsWith(".vkdpls")) {
             path = path.concat(".vkdpls");
         }
+        File playlistFile = new File(path);
+        if (!playlistFile.exists()) {
+            Log.d(TAG, "loadPlaylist: File not exist!");
+            return false;
+        }
+        String playlistString;
         try {
-            InputStream playlistFileInputStream = openFileInput(path);
-//            Reader
+            InputStream playlistFileInputStream = new FileInputStream(path);
+            Reader playlistReader = new InputStreamReader(playlistFileInputStream);
+            char[] buffer = new char[512];
+            int charsRead = 0;
+            StringBuilder builder = new StringBuilder();
+            while ((charsRead = playlistReader.read(buffer)) != -1) {
+                builder.append(buffer, 0, charsRead);
+            }
+            playlistString = builder.toString();
+            playlistReader.close();
+            playlistFileInputStream.close();
         } catch (FileNotFoundException e) {
             Log.d(TAG, "loadPlaylist: FileNotFound exception!");
             e.printStackTrace();
             return false;
+        } catch (IOException e) {
+            Log.d(TAG, "loadPlaylist: Playlist reading exception!");
+            e.printStackTrace();
+            return false;
         }
-        return false; // TODO: 17.11.2016 Implement playlist loading
+        Playlist loadedPlaylist = new Playlist(this);
+        if (!loadedPlaylist.deserialize(playlistString)) {
+            return false;
+        }
+        playlist = loadedPlaylist;
+        return true;
     }
 
     public boolean savePlaylist(String path) {
-        return false; // TODO: 17.11.2016 Implement playlist saving
+        if (path == null) {
+            return false;
+        }
+        if (!path.endsWith(".vkdpls")) {
+            path = path.concat(".vkdpls");
+        }
+        String serializedPlaylist = playlist.serialize();
+        try {
+            OutputStream playlistOutputStream = new FileOutputStream(path);
+            Writer playlistWriter = new OutputStreamWriter(playlistOutputStream);
+            playlistWriter.write(serializedPlaylist);
+            playlistWriter.close();
+            playlistOutputStream.close();
+        } catch (FileNotFoundException e) {
+            Log.d(TAG, "savePlaylist: FileNotFound exception!");
+            e.printStackTrace();
+            return false;
+        } catch (IOException e) {
+            Log.d(TAG, "savePlaylist: Saving failed! IO exception!");
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
     public Playlist getPlaylist() {
