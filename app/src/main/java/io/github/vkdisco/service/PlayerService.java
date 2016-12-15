@@ -3,11 +3,21 @@ package io.github.vkdisco.service;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Environment;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v4.os.EnvironmentCompat;
 import android.util.Log;
 
 import com.un4seen.bass.BASS;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 
 import io.github.vkdisco.model.TrackMetaData;
 import io.github.vkdisco.player.Player;
@@ -127,6 +137,20 @@ public class PlayerService extends Service implements OnTrackSwitchListener,
     }
 
     public boolean loadPlaylist(String path) {
+        if (path == null) {
+            return false;
+        }
+        if (!path.endsWith(".vkdpls")) {
+            path = path.concat(".vkdpls");
+        }
+        try {
+            InputStream playlistFileInputStream = openFileInput(path);
+//            Reader
+        } catch (FileNotFoundException e) {
+            Log.d(TAG, "loadPlaylist: FileNotFound exception!");
+            e.printStackTrace();
+            return false;
+        }
         return false; // TODO: 17.11.2016 Implement playlist loading
     }
 
