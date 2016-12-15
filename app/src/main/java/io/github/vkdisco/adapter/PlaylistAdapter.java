@@ -67,6 +67,14 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             mTVTitle = ((TextView) itemView.findViewById(R.id.tvTitle));
             mTVDuration = ((TextView) itemView.findViewById(R.id.tvDuration));
             mImgBtnMore = ((ImageButton) itemView.findViewById(R.id.imgBtnMore));
+            mImgBtnMore.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mListener != null) {
+                        mListener.onPlaylistItemClick(v, mPosition);
+                    }
+                }
+            });
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

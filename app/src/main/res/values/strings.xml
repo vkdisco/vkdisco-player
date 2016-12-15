@@ -20,4 +20,6 @@
     <string name="text_placeholder_time">--:--</string>
     <string name="text_placeholder_album">Unknown album</string>
     <string name="text_label_choose_file">Choose file(s)</string>
+    <string name="swap">Swap</string>
+    <string name="delete">Delete</string>
 </resources>
