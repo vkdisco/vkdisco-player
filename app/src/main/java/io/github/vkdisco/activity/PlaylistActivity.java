@@ -139,6 +139,18 @@ public class PlaylistActivity extends PlayerCompatActivity
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        onPlaylistChanged();
+    }
+
+    @Override
+    public void onServiceBound(PlayerService playerService) {
+        super.onServiceBound(playerService);
+        onPlaylistChanged();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_toolbar_main, menu);
         return true;

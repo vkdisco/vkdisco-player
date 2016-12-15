@@ -12,6 +12,9 @@ import java.io.ByteArrayOutputStream;
 
 public final class BitmapUtil {
     public static String toString(Bitmap bitmap) {
+        if (bitmap == null) {
+            return null;
+        }
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
         byte[] bytes = byteArrayOutputStream.toByteArray();

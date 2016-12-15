@@ -80,8 +80,15 @@ public class Playlist implements Track.OnTrackDataLoadedListener {
     }
 
     public boolean deserialize(String serialized) {
-        this.tracks = gsonBuilder.create().fromJson(serialized, type);
-        return !tracks.isEmpty();
+        List<Track> newTracks = gsonBuilder.create().fromJson(serialized, type);
+        if (newTracks == null) {
+            return false;
+        }
+        tracks.clear();
+        for (Track track : newTracks) {
+            addTrack(track);
+        }
+        return true;
     }
 
     public boolean hasPreviousTrack() {

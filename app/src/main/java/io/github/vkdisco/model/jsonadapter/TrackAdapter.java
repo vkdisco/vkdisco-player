@@ -1,5 +1,7 @@
 package io.github.vkdisco.model.jsonadapter;
 
+import android.util.Log;
+
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
@@ -29,7 +31,9 @@ public class TrackAdapter extends TypeAdapter<Track> {
             out.name("artist").value(metaData.getArtist());
             out.name("year").value(metaData.getYear());
             out.name("album").value(metaData.getAlbum());
-            out.name("album_art").value(BitmapUtil.toString(metaData.getAlbumArt()));
+            if (metaData.getAlbumArt() != null) {
+                out.name("album_art").value(BitmapUtil.toString(metaData.getAlbumArt()));
+            }
             out.name("duration").value(metaData.getDuration());
             out.endObject();
         }

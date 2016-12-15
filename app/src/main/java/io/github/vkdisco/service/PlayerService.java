@@ -57,6 +57,7 @@ public class PlayerService extends Service implements OnTrackSwitchListener,
 
     private Player player;
     private Playlist playlist;
+    private int boundToMe = 0;
 
     //Lifecycle methods
     @Override
@@ -66,14 +67,11 @@ public class PlayerService extends Service implements OnTrackSwitchListener,
         player = new Player();
         player.setStateChangedListener(this);
         player.setTrackSwitchListener(this);
+        playlist = new Playlist(this);
         File playlistFile = new File(getFilesDir(), DEFAULT_PLAYLIST_FILENAME);
         Log.d(TAG, "onCreate: default playlist: " + playlistFile.getAbsolutePath());
         if (!loadPlaylist(playlistFile.getAbsolutePath())) {
             Log.d(TAG, "onCreate: loading default playlist is failed");
-        }
-        if (playlist == null) {
-            Log.d(TAG, "onCreate: playlist is null");
-            playlist = new Playlist(this);
         }
         player.setPlaylist(playlist);
     }
@@ -94,12 +92,14 @@ public class PlayerService extends Service implements OnTrackSwitchListener,
     @Override
     public IBinder onBind(Intent intent) {
         Log.d(TAG, "onBind: called");
+        addBoundToMe(1);
         return new PlayerBinder();
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
         Log.d(TAG, "onUnbind: called");
+        addBoundToMe(-1);
         return super.onUnbind(intent);
     }
 
@@ -196,12 +196,7 @@ public class PlayerService extends Service implements OnTrackSwitchListener,
             e.printStackTrace();
             return false;
         }
-        Playlist loadedPlaylist = new Playlist(this);
-        if (!loadedPlaylist.deserialize(playlistString)) {
-            return false;
-        }
-        playlist = loadedPlaylist;
-        return true;
+        return playlist.deserialize(playlistString);
     }
 
     public boolean savePlaylist(String path) {
@@ -262,6 +257,13 @@ public class PlayerService extends Service implements OnTrackSwitchListener,
         broadcastIntent.setAction(BROADCAST_ACTION_EVENT);
         broadcastIntent.putExtra(EXTRA_EVENT, event);
         sendBroadcast(broadcastIntent);
+    }
+
+    private void addBoundToMe(int delta) {
+        boundToMe += delta;
+        if ((boundToMe < 1) && (getPlayerState() != PlayerState.PLAYING)) {
+            stopSelf();
+        }
     }
 
     public class PlayerBinder extends Binder {
