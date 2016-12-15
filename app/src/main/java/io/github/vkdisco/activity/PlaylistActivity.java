@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -214,6 +215,30 @@ public class PlaylistActivity extends PlayerCompatActivity
 
     @Override
     public void onPlaylistItemClick(View view, int position) {
+        if (view.getId() == R.id.imgBtnMore) {
+            PopupMenu popup = new PopupMenu(this, view);
+            popup.getMenuInflater()
+                    .inflate(R.menu.menu_three_dots, popup.getMenu());
+            popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    int id = item.getItemId();
+                    if (id == R.id.swap) {
+                        Toast.makeText(PlaylistActivity.this, "Try to swap", Toast.LENGTH_SHORT)
+                                .show();
+                        return true;
+                    }
+                    if (id == R.id.delete) {
+                        Toast.makeText(PlaylistActivity.this, "Try to delete", Toast.LENGTH_LONG)
+                                .show();
+                        return true;
+                    }
+                    return false;
+                }
+            });
+            popup.show();
+            return;
+        }
         PlayerService service = getPlayerService();
         if (service == null) {
             return;
