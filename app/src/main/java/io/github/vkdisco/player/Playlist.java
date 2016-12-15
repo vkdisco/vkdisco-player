@@ -94,11 +94,11 @@ public class Playlist implements Track.OnTrackDataLoadedListener {
     }
 
     public Track getCurrentTrack() {
-        return tracks.get(index);
+        return (tracks.size() != 0) ? tracks.get(index) : null;
     }
 
     public int getCurrentTrackIndex() {
-        return index;
+        return (tracks.size() != 0) ? index : -1;
     }
 
     public boolean hasNextTrack() {

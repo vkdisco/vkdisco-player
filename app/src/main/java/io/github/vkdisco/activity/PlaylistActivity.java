@@ -22,6 +22,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.vk.sdk.VKScope;
 import com.vk.sdk.VKSdk;
@@ -252,7 +253,6 @@ public class PlaylistActivity extends PlayerCompatActivity
         }
     }
 
-    //// FIXME: 04.12.16 Drawable resource doesn't exist
     @Override
     public void onStateChanged(PlayerState state) {
         super.onStateChanged(state);
@@ -309,6 +309,11 @@ public class PlaylistActivity extends PlayerCompatActivity
     }
 
     private void btnAddFromVKOnClick() {
+        if (!VKSdk.isLoggedIn()) {
+            Toast.makeText(this, "Please, sign in VK", Toast.LENGTH_SHORT)
+                    .show();
+            return;
+        }
         DialogFragment dialog = new VKFriendsDialog();
         dialog.show(getSupportFragmentManager(), "vk_friends_dialog");
     }

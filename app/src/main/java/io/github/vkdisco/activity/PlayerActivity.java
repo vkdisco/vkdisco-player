@@ -140,7 +140,7 @@ public class PlayerActivity extends PlayerCompatActivity implements
         service.previousTrack();
     }
 
-    private void onNextClick() {
+    private void onNextClick() {    
         PlayerService service = getPlayerService();
         service.nextTrack();
     }

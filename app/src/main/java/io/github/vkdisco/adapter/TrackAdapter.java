@@ -4,8 +4,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -99,12 +101,15 @@ public class TrackAdapter extends
 
     class TrackViewHolder extends RecyclerView.ViewHolder {
         private TextView artist, title, duration;
+        private ImageButton button;
 
         TrackViewHolder(View itemView) {
             super(itemView);
             artist = (TextView) itemView.findViewById(R.id.tvArtist);
             title = (TextView) itemView.findViewById(R.id.tvTitle);
             duration = (TextView) itemView.findViewById(R.id.tvDuration);
+            button = (ImageButton) itemView.findViewById(R.id.imgBtnMore);
+            button.setVisibility(View.INVISIBLE);
         }
 
         void bind(final Track track, final OnTrackClickListener listener) {
@@ -119,6 +124,7 @@ public class TrackAdapter extends
             artist.setText(metaData.getArtist());
             title.setText(metaData.getTitle());
             duration.setText(metaData.getTime());
+
             //// TODO: 20.11.16 Implement three dots action
             this.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
