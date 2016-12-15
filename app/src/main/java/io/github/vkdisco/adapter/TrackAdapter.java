@@ -109,7 +109,7 @@ public class TrackAdapter extends
             title = (TextView) itemView.findViewById(R.id.tvTitle);
             duration = (TextView) itemView.findViewById(R.id.tvDuration);
             button = (ImageButton) itemView.findViewById(R.id.imgBtnMore);
-            button.setVisibility(View.INVISIBLE);
+            button.setVisibility(View.GONE);
         }
 
         void bind(final Track track, final OnTrackClickListener listener) {
