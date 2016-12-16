@@ -52,7 +52,8 @@ import io.github.vkdisco.service.PlayerService;
 
 public class PlaylistActivity extends PlayerCompatActivity
         implements OnClickListener, OnPlaylistItemClickListener, OnUserSelectedListener,
-        OnTrackSelectedListener, FileDialog.OnFileSelectedListener {
+        OnTrackSelectedListener, FileDialog.OnFileSelectedListener,
+        PlaylistAdapter.OnPlaylistItemContextMenuCallListener {
     private static final String TAG = "PlaylistActivity";
 
     // Custom scope for our app
@@ -220,6 +221,7 @@ public class PlaylistActivity extends PlayerCompatActivity
             mPlaylistAdapter = new PlaylistAdapter(playlist);
             mRVPlaylist.setAdapter(mPlaylistAdapter);
             mPlaylistAdapter.setListener(this);
+            mPlaylistAdapter.setMenuCallListener(this);
         }
         Log.d(TAG, "onPlaylistChanged: data set changed");
         mPlaylistAdapter.notifyDataSetChanged();
@@ -426,5 +428,44 @@ public class PlaylistActivity extends PlayerCompatActivity
             return;
         }
         performAddingFile(file.getAbsolutePath());
+    }
+
+    @Override
+    public void onPlaylistItemContextCall(View v, final int position) {
+        PopupMenu popupMenu = new PopupMenu(this, v);
+        popupMenu.getMenuInflater().inflate(R.menu.menu_three_dots, popupMenu.getMenu());
+
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.swap:
+                        startSwapingTracks(position);
+                        return true;
+                    case R.id.delete:
+                        performDeleteTracks(position);
+                        return true;
+                }
+                return false;
+            }
+        });
+
+        popupMenu.show();
+    }
+
+    private void performDeleteTracks(int position) {
+        PlayerService service = getPlayerService();
+        if (service == null) {
+            return;
+        }
+        Playlist playlist = service.getPlaylist();
+        if (playlist == null) {
+            return;
+        }
+        playlist.removeTrack(position);
+    }
+
+    private void startSwapingTracks(int position) {
+        mPlaylistAdapter.setFlashedItem(position);
     }
 }

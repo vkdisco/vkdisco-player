@@ -1,5 +1,7 @@
 package io.github.vkdisco.adapter;
 
+import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +23,9 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     private Playlist mPlaylist;
 
     private OnPlaylistItemClickListener mListener;
+    private OnPlaylistItemContextMenuCallListener mMenuCallListener;
+
+    private int mFlashedItem = -1;
 
     public PlaylistAdapter(Playlist playlist) {
         this.mPlaylist = playlist;
@@ -35,7 +40,11 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
 
     @Override
     public void onBindViewHolder(PlaylistItemHolder holder, int position) {
-        holder.bind(mPlaylist.getTrack(position), position, mListener);
+        holder.bind(mPlaylist.getTrack(position), position, mListener, mMenuCallListener);
+        holder.unflash();
+        if (mFlashedItem == position) {
+            holder.flash();
+        }
     }
 
     @Override
@@ -47,22 +56,45 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
         void onPlaylistItemClick(View view, int position);
     }
 
+    public interface OnPlaylistItemContextMenuCallListener {
+        void onPlaylistItemContextCall(View view, int position);
+    }
+
     public void setListener(OnPlaylistItemClickListener listener) {
         this.mListener = listener;
     }
 
+    public void setMenuCallListener(OnPlaylistItemContextMenuCallListener menuCallListener) {
+        this.mMenuCallListener = menuCallListener;
+    }
+
+    public void setFlashedItem(int position) {
+        this.mFlashedItem = position;
+        notifyDataSetChanged();
+    }
+
+    public void unflashItem() {
+        mFlashedItem = -1;
+        notifyDataSetChanged();
+    }
+
     public static class PlaylistItemHolder extends RecyclerView.ViewHolder {
+        private View mView;
         private TextView mTVArtist;
         private TextView mTVTitle;
         private TextView mTVDuration;
         private ImageButton mImgBtnMore;
+        private Drawable mViewBackground;
 
         private OnPlaylistItemClickListener mListener;
+        private OnPlaylistItemContextMenuCallListener mMenuCallListener;
 
         private int mPosition;
 
         public PlaylistItemHolder(View itemView) {
             super(itemView);
+            mView = itemView;
+            mViewBackground = itemView.getBackground();
             mTVArtist = ((TextView) itemView.findViewById(R.id.tvArtist));
             mTVTitle = ((TextView) itemView.findViewById(R.id.tvTitle));
             mTVDuration = ((TextView) itemView.findViewById(R.id.tvDuration));
@@ -70,8 +102,8 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             mImgBtnMore.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (mListener != null) {
-                        mListener.onPlaylistItemClick(v, mPosition);
+                    if (mMenuCallListener != null) {
+                        mMenuCallListener.onPlaylistItemContextCall(v, mPosition);
                     }
                 }
             });
@@ -85,7 +117,8 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             });
         }
 
-        public void bind(Track track, int position, OnPlaylistItemClickListener listener) {
+        public void bind(Track track, int position, OnPlaylistItemClickListener listener,
+                         OnPlaylistItemContextMenuCallListener menuCallListener) {
             TrackMetaData metaData = track.getMetaData();
             if (metaData == null) {
                 mTVArtist.setText(R.string.text_label_no_metadata);
@@ -99,6 +132,16 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             mTVDuration.setText(metaData.getTime());
             mPosition = position;
             mListener = listener;
+            mMenuCallListener = menuCallListener;
+        }
+
+        public void flash() {
+            mViewBackground = mView.getBackground();
+            mView.setBackgroundResource(R.color.primaryLight);
+        }
+
+        public void unflash() {
+            mView.setBackground(mViewBackground);
         }
     }
 }
