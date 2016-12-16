@@ -18,4 +18,8 @@
         android:id="@+id/menuClearPlaylist"
         android:title="@string/text_menu_clear_playlist"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/menuAbout"
+        android:title="@string/text_title_about_dialog"
+        app:showAsAction="never" />
 </menu>

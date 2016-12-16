@@ -28,4 +28,9 @@
     <string name="text_label_filename">Filename</string>
     <string name="text_button_dialog_save">Save</string>
     <string name="text_filename_empty">Filename empty</string>
+    <string name="text_dialog_developers">Developers:</string>
+    <string name="text_dialog_developers_list">Andrii Tkachenko\nDmytro Dmytriev\nOleksandr Hryb\nOleksii Lytovchenko\nStanislav Riabkov</string>
+    <string name="text_dialog_nus">Gr. 3151, NUS, 2016</string>
+    <string name="text_title_about_dialog">About...</string>
+    <string name="text_button_ok">OK</string>
 </resources>

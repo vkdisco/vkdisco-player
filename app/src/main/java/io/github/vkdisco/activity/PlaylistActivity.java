@@ -34,6 +34,7 @@ import java.io.File;
 import io.github.vkdisco.R;
 import io.github.vkdisco.adapter.PlaylistAdapter;
 import io.github.vkdisco.adapter.PlaylistAdapter.OnPlaylistItemClickListener;
+import io.github.vkdisco.fragment.AboutDialog;
 import io.github.vkdisco.fragment.FileDialog;
 import io.github.vkdisco.fragment.VKFriendsDialog;
 import io.github.vkdisco.fragment.VKTracksDialog;
@@ -200,6 +201,10 @@ public class PlaylistActivity extends PlayerCompatActivity
                 return true;
             }
             playlist.clear();
+        }
+        if (id == R.id.menuAbout) {
+            AboutDialog aboutDialog = new AboutDialog();
+            aboutDialog.show(getSupportFragmentManager(), "AboutDialog");
         }
         return super.onOptionsItemSelected(item);
     }
