@@ -143,12 +143,14 @@ public class PlaylistActivity extends PlayerCompatActivity
     protected void onResume() {
         super.onResume();
         onPlaylistChanged();
+        onTrackSwitched();
     }
 
     @Override
     public void onServiceBound(PlayerService playerService) {
         super.onServiceBound(playerService);
         onPlaylistChanged();
+        onTrackSwitched();
     }
 
     @Override
