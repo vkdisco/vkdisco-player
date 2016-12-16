@@ -52,8 +52,7 @@ import io.github.vkdisco.service.PlayerService;
 
 public class PlaylistActivity extends PlayerCompatActivity
         implements OnClickListener, OnPlaylistItemClickListener, OnUserSelectedListener,
-        OnTrackSelectedListener, FileDialog.OnFileSelectedListener,
-        PlaylistAdapter.OnPlaylistItemContextMenuCallListener {
+        OnTrackSelectedListener, FileDialog.OnFileSelectedListener {
     private static final String TAG = "PlaylistActivity";
 
     // Custom scope for our app
@@ -73,14 +72,15 @@ public class PlaylistActivity extends PlayerCompatActivity
 
     private ImageView mIVAlbumArt;
 
+    private boolean mPlaylistSwapMode = false;
+    private int mTrackIndexToSwap = -1;
+
     ImageButton mBtnPlayPause;
-
     private boolean fabStatus = false;
-
     private FloatingActionButton btnAdd;
+
     private FloatingActionButton btnFile;
     private FloatingActionButton btnVK;
-
     private Animation show_fab_file;
     private Animation hide_fab_file;
     private Animation show_fab_vk;
@@ -221,43 +221,53 @@ public class PlaylistActivity extends PlayerCompatActivity
             mPlaylistAdapter = new PlaylistAdapter(playlist);
             mRVPlaylist.setAdapter(mPlaylistAdapter);
             mPlaylistAdapter.setListener(this);
-            mPlaylistAdapter.setMenuCallListener(this);
         }
         Log.d(TAG, "onPlaylistChanged: data set changed");
         mPlaylistAdapter.notifyDataSetChanged();
     }
 
     @Override
-    public void onPlaylistItemClick(View view, int position) {
-        if (view.getId() == R.id.imgBtnMore) {
+    public void onPlaylistItemClick(View view, final int position) {
+        if ((view.getId() == R.id.imgBtnMore) && (!mPlaylistSwapMode)) {
+
             PopupMenu popup = new PopupMenu(this, view);
             popup.getMenuInflater()
                     .inflate(R.menu.menu_three_dots, popup.getMenu());
+
             popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
                     int id = item.getItemId();
+
                     if (id == R.id.swap) {
-                        Toast.makeText(PlaylistActivity.this, "Try to swap", Toast.LENGTH_SHORT)
-                                .show();
+                        startSwappingTrack(position);
                         return true;
                     }
+
                     if (id == R.id.delete) {
-                        Toast.makeText(PlaylistActivity.this, "Try to delete", Toast.LENGTH_LONG)
-                                .show();
+                        performDeleteTrack(position);
                         return true;
                     }
+
                     return false;
                 }
+
             });
+
             popup.show();
             return;
         }
+
         PlayerService service = getPlayerService();
         if (service == null) {
             return;
         }
-        service.playTrack(position);
+        if (mPlaylistSwapMode) {
+            finishSwappingTrack(position);
+        } else {
+            service.playTrack(position);
+        }
     }
 
     @Override
@@ -430,30 +440,7 @@ public class PlaylistActivity extends PlayerCompatActivity
         performAddingFile(file.getAbsolutePath());
     }
 
-    @Override
-    public void onPlaylistItemContextCall(View v, final int position) {
-        PopupMenu popupMenu = new PopupMenu(this, v);
-        popupMenu.getMenuInflater().inflate(R.menu.menu_three_dots, popupMenu.getMenu());
-
-        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.swap:
-                        startSwapingTracks(position);
-                        return true;
-                    case R.id.delete:
-                        performDeleteTracks(position);
-                        return true;
-                }
-                return false;
-            }
-        });
-
-        popupMenu.show();
-    }
-
-    private void performDeleteTracks(int position) {
+    private void performDeleteTrack(int position) {
         PlayerService service = getPlayerService();
         if (service == null) {
             return;
@@ -465,7 +452,24 @@ public class PlaylistActivity extends PlayerCompatActivity
         playlist.removeTrack(position);
     }
 
-    private void startSwapingTracks(int position) {
+    private void startSwappingTrack(int position) {
         mPlaylistAdapter.setFlashedItem(position);
+        mPlaylistSwapMode = true;
+        mTrackIndexToSwap = position;
+    }
+
+    private void finishSwappingTrack(int position) {
+        PlayerService service = getPlayerService();
+        if (service == null) {
+            return;
+        }
+        Playlist playlist = service.getPlaylist();
+        if (playlist == null) {
+            return;
+        }
+        playlist.swap(position, mTrackIndexToSwap);
+        mTrackIndexToSwap = -1;
+        mPlaylistSwapMode = false;
+        mPlaylistAdapter.unflashItem();
     }
 }
