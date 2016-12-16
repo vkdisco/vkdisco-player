@@ -1,6 +1,5 @@
 package io.github.vkdisco.adapter;
 
-import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;

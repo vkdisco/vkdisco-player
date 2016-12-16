@@ -42,6 +42,7 @@ import io.github.vkdisco.fragment.interfaces.OnUserSelectedListener;
 import io.github.vkdisco.model.FileTrack;
 import io.github.vkdisco.model.Track;
 import io.github.vkdisco.model.TrackMetaData;
+import io.github.vkdisco.player.Player;
 import io.github.vkdisco.player.PlayerState;
 import io.github.vkdisco.player.Playlist;
 import io.github.vkdisco.service.PlayerService;
@@ -85,6 +86,9 @@ public class PlaylistActivity extends PlayerCompatActivity
     private Animation hide_fab_file;
     private Animation show_fab_vk;
     private Animation hide_fab_vk;
+
+    private boolean mExportMode = false;
+    private boolean mImportMode = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -169,6 +173,33 @@ public class PlaylistActivity extends PlayerCompatActivity
                 VKSdk.logout();
             }
             return true;
+        }
+        if (id == R.id.menuExportPlaylist) {
+            FileDialog fileDialog = new FileDialog();
+            fileDialog.setSelectMode(FileDialog.SelectMode.SAVE_FILE);
+            fileDialog.setStartFile(new File("/mnt/"));
+            fileDialog.setListener(this);
+            mExportMode = true;
+            fileDialog.show(getSupportFragmentManager(), "PlaylistActivity");
+        }
+        if (id == R.id.menuImportPlaylist) {
+            FileDialog fileDialog = new FileDialog();
+            fileDialog.setSelectMode(FileDialog.SelectMode.SINGLE_FILE);
+            fileDialog.setListener(this);
+            fileDialog.setStartFile(new File("/mnt/"));
+            mImportMode = true;
+            fileDialog.show(getSupportFragmentManager(), "PlaylistActivity");
+        }
+        if (id == R.id.menuClearPlaylist) {
+            PlayerService service = getPlayerService();
+            if (service == null) {
+                return true;
+            }
+            Playlist playlist = service.getPlaylist();
+            if (playlist == null) {
+                return true;
+            }
+            playlist.clear();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -437,6 +468,21 @@ public class PlaylistActivity extends PlayerCompatActivity
     public void onFileSelected(File file) {
         if (file == null) {
             Log.d(TAG, "onFileSelected: Selected file is null!");
+            return;
+        }
+        PlayerService service = getPlayerService();
+        if (mImportMode) {
+            if (service != null) {
+                service.loadPlaylist(file.getAbsolutePath());
+            }
+            mImportMode = false;
+            return;
+        }
+        if (mExportMode) {
+            if (service != null) {
+                service.savePlaylist(file.getAbsolutePath());
+            }
+            mExportMode = false;
             return;
         }
         performAddingFile(file.getAbsolutePath());

@@ -63,6 +63,13 @@ public class Playlist implements Track.OnTrackDataLoadedListener {
         return previous;
     }
 
+    public void clear() {
+        tracks.clear();
+        if (listener != null) {
+            listener.onPlaylistChanged();
+        }
+    }
+
     public boolean swap(int indexA, int indexB) {
         int size = tracks.size();
         if (indexA > size || indexB > size) {
