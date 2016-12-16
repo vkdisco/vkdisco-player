@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -22,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.vk.sdk.VKScope;
 import com.vk.sdk.VKSdk;
@@ -40,6 +42,7 @@ import io.github.vkdisco.fragment.interfaces.OnUserSelectedListener;
 import io.github.vkdisco.model.FileTrack;
 import io.github.vkdisco.model.Track;
 import io.github.vkdisco.model.TrackMetaData;
+import io.github.vkdisco.player.Player;
 import io.github.vkdisco.player.PlayerState;
 import io.github.vkdisco.player.Playlist;
 import io.github.vkdisco.service.PlayerService;
@@ -70,18 +73,22 @@ public class PlaylistActivity extends PlayerCompatActivity
 
     private ImageView mIVAlbumArt;
 
+    private boolean mPlaylistSwapMode = false;
+    private int mTrackIndexToSwap = -1;
+
     ImageButton mBtnPlayPause;
-
     private boolean fabStatus = false;
-
     private FloatingActionButton btnAdd;
+
     private FloatingActionButton btnFile;
     private FloatingActionButton btnVK;
-
     private Animation show_fab_file;
     private Animation hide_fab_file;
     private Animation show_fab_vk;
     private Animation hide_fab_vk;
+
+    private boolean mExportMode = false;
+    private boolean mImportMode = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -137,6 +144,20 @@ public class PlaylistActivity extends PlayerCompatActivity
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        onPlaylistChanged();
+        onTrackSwitched();
+    }
+
+    @Override
+    public void onServiceBound(PlayerService playerService) {
+        super.onServiceBound(playerService);
+        onPlaylistChanged();
+        onTrackSwitched();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_toolbar_main, menu);
         return true;
@@ -152,6 +173,33 @@ public class PlaylistActivity extends PlayerCompatActivity
                 VKSdk.logout();
             }
             return true;
+        }
+        if (id == R.id.menuExportPlaylist) {
+            FileDialog fileDialog = new FileDialog();
+            fileDialog.setSelectMode(FileDialog.SelectMode.SAVE_FILE);
+            fileDialog.setStartFile(new File("/mnt/"));
+            fileDialog.setListener(this);
+            mExportMode = true;
+            fileDialog.show(getSupportFragmentManager(), "PlaylistActivity");
+        }
+        if (id == R.id.menuImportPlaylist) {
+            FileDialog fileDialog = new FileDialog();
+            fileDialog.setSelectMode(FileDialog.SelectMode.SINGLE_FILE);
+            fileDialog.setListener(this);
+            fileDialog.setStartFile(new File("/mnt/"));
+            mImportMode = true;
+            fileDialog.show(getSupportFragmentManager(), "PlaylistActivity");
+        }
+        if (id == R.id.menuClearPlaylist) {
+            PlayerService service = getPlayerService();
+            if (service == null) {
+                return true;
+            }
+            Playlist playlist = service.getPlaylist();
+            if (playlist == null) {
+                return true;
+            }
+            playlist.clear();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -212,12 +260,47 @@ public class PlaylistActivity extends PlayerCompatActivity
     }
 
     @Override
-    public void onPlaylistItemClick(View view, int position) {
+    public void onPlaylistItemClick(View view, final int position) {
+        if ((view.getId() == R.id.imgBtnMore) && (!mPlaylistSwapMode)) {
+
+            PopupMenu popup = new PopupMenu(this, view);
+            popup.getMenuInflater()
+                    .inflate(R.menu.menu_three_dots, popup.getMenu());
+
+            popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    int id = item.getItemId();
+
+                    if (id == R.id.swap) {
+                        startSwappingTrack(position);
+                        return true;
+                    }
+
+                    if (id == R.id.delete) {
+                        performDeleteTrack(position);
+                        return true;
+                    }
+
+                    return false;
+                }
+
+            });
+
+            popup.show();
+            return;
+        }
+
         PlayerService service = getPlayerService();
         if (service == null) {
             return;
         }
-        service.playTrack(position);
+        if (mPlaylistSwapMode) {
+            finishSwappingTrack(position);
+        } else {
+            service.playTrack(position);
+        }
     }
 
     @Override
@@ -252,7 +335,6 @@ public class PlaylistActivity extends PlayerCompatActivity
         }
     }
 
-    //// FIXME: 04.12.16 Drawable resource doesn't exist
     @Override
     public void onStateChanged(PlayerState state) {
         super.onStateChanged(state);
@@ -309,6 +391,11 @@ public class PlaylistActivity extends PlayerCompatActivity
     }
 
     private void btnAddFromVKOnClick() {
+        if (!VKSdk.isLoggedIn()) {
+            Toast.makeText(this, "Please, sign in VK", Toast.LENGTH_SHORT)
+                    .show();
+            return;
+        }
         DialogFragment dialog = new VKFriendsDialog();
         dialog.show(getSupportFragmentManager(), "vk_friends_dialog");
     }
@@ -383,6 +470,54 @@ public class PlaylistActivity extends PlayerCompatActivity
             Log.d(TAG, "onFileSelected: Selected file is null!");
             return;
         }
+        PlayerService service = getPlayerService();
+        if (mImportMode) {
+            if (service != null) {
+                service.loadPlaylist(file.getAbsolutePath());
+            }
+            mImportMode = false;
+            return;
+        }
+        if (mExportMode) {
+            if (service != null) {
+                service.savePlaylist(file.getAbsolutePath());
+            }
+            mExportMode = false;
+            return;
+        }
         performAddingFile(file.getAbsolutePath());
+    }
+
+    private void performDeleteTrack(int position) {
+        PlayerService service = getPlayerService();
+        if (service == null) {
+            return;
+        }
+        Playlist playlist = service.getPlaylist();
+        if (playlist == null) {
+            return;
+        }
+        playlist.removeTrack(position);
+    }
+
+    private void startSwappingTrack(int position) {
+        mPlaylistAdapter.setFlashedItem(position);
+        mPlaylistSwapMode = true;
+        mTrackIndexToSwap = position;
+    }
+
+    private void finishSwappingTrack(int position) {
+        PlayerService service = getPlayerService();
+        if (service == null) {
+            return;
+        }
+        Playlist playlist = service.getPlaylist();
+        if (playlist == null) {
+            return;
+        }
+        playlist.swap(position, mTrackIndexToSwap);
+        mTrackIndexToSwap = -1;
+        mPlaylistSwapMode = false;
+        mPlaylistAdapter.unflashItem();
     }
 }

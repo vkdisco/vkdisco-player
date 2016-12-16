@@ -20,4 +20,12 @@
     <string name="text_placeholder_time">--:--</string>
     <string name="text_placeholder_album">Unknown album</string>
     <string name="text_label_choose_file">Choose file(s)</string>
+    <string name="swap">Swap</string>
+    <string name="delete">Delete</string>
+    <string name="text_menu_export_playlist">Export playlist</string>
+    <string name="text_menu_import_playlist">Import playlist</string>
+    <string name="text_menu_clear_playlist">Clear playlist</string>
+    <string name="text_label_filename">Filename</string>
+    <string name="text_button_dialog_save">Save</string>
+    <string name="text_filename_empty">Filename empty</string>
 </resources>

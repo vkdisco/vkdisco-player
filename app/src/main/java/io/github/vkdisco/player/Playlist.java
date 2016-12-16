@@ -63,6 +63,13 @@ public class Playlist implements Track.OnTrackDataLoadedListener {
         return previous;
     }
 
+    public void clear() {
+        tracks.clear();
+        if (listener != null) {
+            listener.onPlaylistChanged();
+        }
+    }
+
     public boolean swap(int indexA, int indexB) {
         int size = tracks.size();
         if (indexA > size || indexB > size) {
@@ -80,8 +87,15 @@ public class Playlist implements Track.OnTrackDataLoadedListener {
     }
 
     public boolean deserialize(String serialized) {
-        this.tracks = gsonBuilder.create().fromJson(serialized, type);
-        return !tracks.isEmpty();
+        List<Track> newTracks = gsonBuilder.create().fromJson(serialized, type);
+        if (newTracks == null) {
+            return false;
+        }
+        tracks.clear();
+        for (Track track : newTracks) {
+            addTrack(track);
+        }
+        return true;
     }
 
     public boolean hasPreviousTrack() {
@@ -94,11 +108,11 @@ public class Playlist implements Track.OnTrackDataLoadedListener {
     }
 
     public Track getCurrentTrack() {
-        return tracks.get(index);
+        return (tracks.size() != 0) ? tracks.get(index) : null;
     }
 
     public int getCurrentTrackIndex() {
-        return index;
+        return (tracks.size() != 0) ? index : -1;
     }
 
     public boolean hasNextTrack() {

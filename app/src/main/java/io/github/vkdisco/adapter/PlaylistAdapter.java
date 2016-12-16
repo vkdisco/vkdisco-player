@@ -1,5 +1,6 @@
 package io.github.vkdisco.adapter;
 
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +23,8 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
 
     private OnPlaylistItemClickListener mListener;
 
+    private int mFlashedItem = -1;
+
     public PlaylistAdapter(Playlist playlist) {
         this.mPlaylist = playlist;
     }
@@ -36,6 +39,10 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     @Override
     public void onBindViewHolder(PlaylistItemHolder holder, int position) {
         holder.bind(mPlaylist.getTrack(position), position, mListener);
+        holder.unflash();
+        if (mFlashedItem == position) {
+            holder.flash();
+        }
     }
 
     @Override
@@ -51,11 +58,23 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
         this.mListener = listener;
     }
 
+    public void setFlashedItem(int position) {
+        this.mFlashedItem = position;
+        notifyDataSetChanged();
+    }
+
+    public void unflashItem() {
+        mFlashedItem = -1;
+        notifyDataSetChanged();
+    }
+
     public static class PlaylistItemHolder extends RecyclerView.ViewHolder {
+        private View mView;
         private TextView mTVArtist;
         private TextView mTVTitle;
         private TextView mTVDuration;
         private ImageButton mImgBtnMore;
+        private Drawable mViewBackground;
 
         private OnPlaylistItemClickListener mListener;
 
@@ -63,10 +82,20 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
 
         public PlaylistItemHolder(View itemView) {
             super(itemView);
+            mView = itemView;
+            mViewBackground = itemView.getBackground();
             mTVArtist = ((TextView) itemView.findViewById(R.id.tvArtist));
             mTVTitle = ((TextView) itemView.findViewById(R.id.tvTitle));
             mTVDuration = ((TextView) itemView.findViewById(R.id.tvDuration));
             mImgBtnMore = ((ImageButton) itemView.findViewById(R.id.imgBtnMore));
+            mImgBtnMore.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mListener != null) {
+                        mListener.onPlaylistItemClick(v, mPosition);
+                    }
+                }
+            });
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -91,6 +120,15 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             mTVDuration.setText(metaData.getTime());
             mPosition = position;
             mListener = listener;
+        }
+
+        public void flash() {
+            mViewBackground = mView.getBackground();
+            mView.setBackgroundResource(R.color.primaryLight);
+        }
+
+        public void unflash() {
+            mView.setBackground(mViewBackground);
         }
     }
 }

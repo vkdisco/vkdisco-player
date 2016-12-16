@@ -32,7 +32,9 @@ public class Player implements OnTrackEndListener {
 
     public void play() {
         if ((currentTrack == null) && (playlist != null)) {
-            switchTrack(playlist.getCurrentTrack());
+            if (playlist.count() != 0) {
+                switchTrack(playlist.getCurrentTrack());
+            }
         }
         startPlaying();
     }
